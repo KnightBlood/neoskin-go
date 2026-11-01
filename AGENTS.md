@@ -6,7 +6,7 @@
 
 ## 1. 目标与基线
 
-- **目标**：将 `blessing-skin-server-Laravel13`（6.0.11_patch）完整迁移到 Go 1.25 + Goravel v1.18。
+- **目标**：将 `blessing-skin-server-Laravel13`（6.0.11_patch）完整迁移到 Go 1.26 + Goravel v1.18。
 - **基线**：`D:\WORKspace\NeoSkin\blessing-skin-server-Laravel13`（只读参考，禁止修改）。
 - **当前版本**：迁移进行中（当前只有迁移文档，尚无 Go 代码）。
 
@@ -28,7 +28,7 @@
 
 | 组件 | 版本 |
 | --- | --- |
-| Go | 1.25.x |
+| Go | 1.26.x |
 | Goravel | v1.18.0 |
 | ORM | Goravel Orm (GORM) |
 | 数据库 | SQLite / MySQL / MariaDB / PostgreSQL / SQL Server |

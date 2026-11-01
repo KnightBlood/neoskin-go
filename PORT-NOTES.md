@@ -164,3 +164,8 @@ go test ./internal/db -run TestMatrix -v
   路由即时生成同样的 `blessing.i18n = {...}`，避免依赖部署目录可写。
 - **webp 头像**：目前只有 PNG 编码器，`<picture>` 的 source 也改为 `image/png`，
   避免浏览器按 webp 类型取到 PNG 后解码失败。
+
+## 7. Go 版本
+
+- `go.mod` 要求 **Go 1.26**：依赖链中的 `golang.org/x/crypto v0.58.0` 声明 `go 1.26.0`，因此 CI 的 `setup-go` 固定 `1.26`。本地开发使用 1.27 亦可向下兼容编译。
+

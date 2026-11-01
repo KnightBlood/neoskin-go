@@ -1,6 +1,6 @@
 # NeoSkinGo — Go / Goravel 迁移计划
 
-> **目标**：把 `blessing-skin-server-Laravel13`（6.0.11_patch，Laravel 13.38 + PHP 8.5）完整迁移到 Go 1.25 + Goravel v1.18，保持 **HTTP 接口字节级兼容** 与 **数据库结构/数据完全兼容**。
+> **目标**：把 `blessing-skin-server-Laravel13`（6.0.11_patch，Laravel 13.38 + PHP 8.5）完整迁移到 Go 1.26 + Goravel v1.18，保持 **HTTP 接口字节级兼容** 与 **数据库结构/数据完全兼容**。
 
 ---
 
@@ -20,7 +20,7 @@
 
 | 组件 | 选型 | 版本 | 说明 |
 | --- | --- | --- | --- |
-| 语言 | Go | 1.25.x | Goravel v1.18 要求 |
+| 语言 | Go | 1.26.x | Goravel v1.18 要求 |
 | 框架 | Goravel | v1.18.0 | Laravel 风格，facades 1:1 映射 |
 | ORM | Goravel Orm (GORM) | v1.18 | 支持 MySQL/MariaDB/SQLite/PostgreSQL |
 | 数据库 | SQLite / MySQL / MariaDB / PostgreSQL / SQL Server | — | 与 Laravel config/database.php 一致（默认 mysql） |

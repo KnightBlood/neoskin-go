@@ -15,7 +15,7 @@ Go / Goravel 实现的 Minecraft 皮肤托管平台后端，迁移自 `blessing-
 
 ## 技术栈
 
-- **语言**：Go 1.25
+- **语言**：Go 1.26
 - **框架**：Goravel v1.18（Laravel 风格）
 - **ORM**：Goravel Orm (GORM)
 - **数据库**：SQLite / MySQL / MariaDB / PostgreSQL / SQL Server（与 Laravel 一致；矩阵见 [DB-MATRIX.md](./DB-MATRIX.md)）
