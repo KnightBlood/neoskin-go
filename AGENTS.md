@@ -8,7 +8,8 @@
 
 - **目标**：将 `blessing-skin-server-Laravel13`（6.0.11_patch）完整迁移到 Go 1.26 + Goravel v1.18。
 - **基线**：`D:\WORKspace\NeoSkin\blessing-skin-server-Laravel13`（只读参考，禁止修改）。
-- **当前版本**：迁移进行中（当前只有迁移文档，尚无 Go 代码）。
+- **当前版本**：145/145 唯一路径已接通；`legacy` 前端默认可用，共享前端
+  `../NeoSkinFrontend` 的 `next` 模式接入中。
 
 ## 2. 硬约束（不可破坏）
 
@@ -18,11 +19,12 @@
 4. **patch 功能保留**：6.0.3 ~ 6.0.11_patch 全部功能。
 5. **禁止修改源目录**：`blessing-skin-server-Laravel13`、`blessing-skin-server`、`blessing-skin-server-patch` 为只读参考。
 6. **前端：双轨并存**：`public/app/`（既有预编译产物）+ Twig/Go 模板为
-   `legacy` 默认实现，**原样保留**；新增 React SPA 走 `frontend/site`（TDesign）与
-   `frontend/admin`（antd），通过 `FRONTEND_MODE=legacy|next` 切换。
+   `legacy` 默认实现，**原样保留**；新增 React SPA 使用**共享前端仓库**
+   `../NeoSkinFrontend`（`apps/site` TDesign、`apps/admin` antd），
+   通过 `FRONTEND_MODE=legacy|next` 切换，Go 端接入见 `FRONTEND-INTEGRATION.md`。
    `legacy` 路径下的前端契约（`window.blessing`、`#blessing-extra`、`#logout-button`、
    `data-mark="nickname"`、`.locale`、`<main></main>`、`data-*` 钩子）必须逐字保住。
-   详见 `MIGRATION.md §9.0` 与 `FRONTEND-REBUILD-PLAN.md`。
+   详见 `MIGRATION.md §9.0` 与 `FRONTEND-INTEGRATION.md`。
 
 ## 3. 技术栈锁定
 
@@ -33,7 +35,7 @@
 | ORM | Goravel Orm (GORM) |
 | 数据库 | SQLite / MySQL / MariaDB / PostgreSQL / SQL Server |
 | 模板 | Go `html/template` |
-| 前端 | webpack + yarn 1.x（复用现有） |
+| 前端 | `legacy`：webpack + yarn 1.x（复用 `public/app`）<br>`next`：共享项目 `../NeoSkinFrontend`（React 19.3.1 + Vite 8.3.3，TDesign / antd） |
 
 ## 4. 禁止事项
 

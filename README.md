@@ -4,14 +4,14 @@
 
 Go / Goravel 实现的 Minecraft 皮肤托管平台后端，迁移自 `blessing-skin-server-Laravel13`（6.0.11_patch）。
 
-> **当前状态：Phase 0 / 0.5 完成，Phase 1/2 进行中。**
-> 已完成 Goravel 骨架、五库连接、17 张表安装器与矩阵；PHP 兼容层（bcrypt `$2y$`、
-> SHA-256、时间格式）；用户/玩家/纹理仓储；Minecraft `{player}.json`、
-> `/csl/{player}.json`、`/textures/{hash}`、`/csl/textures/{hash}`；
-> 登录/登出/注册/验证码/`/api/user`（Goravel session + CSRF + options）；
-> 用户资料/头像/积分/签到/深色模式；玩家管理；衣柜分页/收藏/改名/移除；
-> 皮肤库浏览/管理/上传；举报提交与审核。
-> 找回密码、OAuth2、管理端其余页面、模板仍待移植。
+> **当前状态：145/145 唯一路径已接通，174 条 PHP 路由全部注册。**
+> 已完成 Goravel 骨架、五库连接、17 张表安装器；PHP 兼容层（bcrypt `$2y$`、
+> SHA-256、时间格式）；认证/注册/验证码/找回/重置/验证/绑定；OAuth2（授权码、
+> 个人令牌、refresh、Bearer + scope）；Minecraft `{player}.json`、`/csl/{player}.json`、
+> `/textures/{hash}`、`/csl/textures/{hash}`、头像/预览渲染；用户中心、皮肤库、
+> 管理端全部页面（含通信可视化编辑器）、安装向导；插件 Hook/Filter/Event 运行时；
+> 语言包与业务 API 消息本地化；Go HTTP E2E + 五库 CI 矩阵全绿。
+> 前端 `next` 模式（共享项目 `../NeoSkinFrontend`）尚未接入，`legacy` 为默认。
 
 ## 技术栈
 
@@ -23,8 +23,9 @@ Go / Goravel 实现的 Minecraft 皮肤托管平台后端，迁移自 `blessing-
 - **模板**：Go `html/template`
 - **前端（双轨）**：
   - `legacy`（默认）：复用 PHP 源项目预编译产物 `public/app` + webpack + yarn 1.x
-  - `next`（进行中）：React 19.3.1 + Vite 8.3.3，两套独立 SPA
-    （站点端 TDesign 1.18.6 / 管理端 antd 6.6.8），见 [FRONTEND-REBUILD-PLAN.md](./FRONTEND-REBUILD-PLAN.md)
+  - `next`（进行中）：共享前端项目 [`../NeoSkinFrontend`](../NeoSkinFrontend)，
+    React 19.3.1 + Vite 8.3.3，两套独立 SPA（站点端 TDesign 1.18.6 / 管理端 antd 6.6.8）；
+    Go 端接入说明见 [FRONTEND-INTEGRATION.md](./FRONTEND-INTEGRATION.md)
 - **图像**：`image` + `golang.org/x/image` + WebP 编码（默认 WebP，`?png` 回退 PNG）
 
 ## 项目结构
@@ -155,7 +156,7 @@ PostgreSQL 5433 / WiltonDB 1433，设置对应 `DB_*` 后运行矩阵测试。
 - [PROGRESS.md](./PROGRESS.md) — 当前进度快照（每次会话结束更新）
 - [ACCEPTANCE.md](./ACCEPTANCE.md) — 验收清单（路由/数据/前端/插件/CI）
 - [DEPLOYMENT.md](./DEPLOYMENT.md) — 部署、反向代理、在线更新与从 PHP 迁移
-- [FRONTEND-REBUILD-PLAN.md](./FRONTEND-REBUILD-PLAN.md) — 前端重构计划（React 19.3 + Vite 8.3.3 / TDesign + antd）
+- [FRONTEND-INTEGRATION.md](./FRONTEND-INTEGRATION.md) — Go 端接入共享前端（`../NeoSkinFrontend`）说明
 
 ## 硬约束
 
