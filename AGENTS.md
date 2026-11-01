@@ -17,12 +17,12 @@
 3. **插件 API 契约**：Hook（7 方法）、PluginManager（13 方法）、Plugin、24 个 Event 的对外语义保持。
 4. **patch 功能保留**：6.0.3 ~ 6.0.11_patch 全部功能。
 5. **禁止修改源目录**：`blessing-skin-server-Laravel13`、`blessing-skin-server`、`blessing-skin-server-patch` 为只读参考。
-6. **前端：双轨并存**：`public/app/`（既有预编译产物）+ Twig/Go 模板为
-   `legacy` 默认实现，**原样保留**；新增 React SPA 走 `frontend/site`（TDesign）与
-   `frontend/admin`（antd），通过 `FRONTEND_MODE=legacy|next` 切换。
-   `legacy` 路径下的前端契约（`window.blessing`、`#blessing-extra`、`#logout-button`、
-   `data-mark="nickname"`、`.locale`、`<main></main>`、`data-*` 钩子）必须逐字保住。
-   详见 `MIGRATION.md §9.0` 与 `FRONTEND-REBUILD-PLAN.md`。
+6. **前端直接复用，不自己重写**：`resources/assets/`（前端源码）与
+   `public/app/`（预编译产物）原样复用源项目，**不重新打包、不换技术栈、
+   不做 SPA 改造**。静态产物拷贝到 `public/assets/app/`，`/lang/<locale>.js`
+   由后端生成。服务端模板（Twig）是**前端契约**：`window.blessing`、
+   `#blessing-extra`、`#logout-button`、`data-mark="nickname"`、`.locale`、
+   `<main></main>`、`data-*` 钩子必须逐字保住。详见 `MIGRATION.md §9.0`。
 
 ## 3. 技术栈锁定
 
