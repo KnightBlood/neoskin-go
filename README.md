@@ -1,5 +1,7 @@
 # NeoSkinGo
 
+> 仓库：<https://github.com/KnightBlood/neoskin-go>
+
 Go / Goravel 实现的 Minecraft 皮肤托管平台后端，迁移自 `blessing-skin-server-Laravel13`（6.0.11_patch）。
 
 > **当前状态：Phase 0 / 0.5 完成，Phase 1/2 进行中。**

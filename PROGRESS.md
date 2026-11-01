@@ -2,6 +2,7 @@
 
 > 每次会话结束更新本文件，并在回复末尾给出「进度」一行。
 > 最后更新：2026-11-01。
+> 仓库：<https://github.com/KnightBlood/neoskin-go>
 
 ## 1. 总览
 
