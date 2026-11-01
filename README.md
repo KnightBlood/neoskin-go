@@ -21,7 +21,10 @@ Go / Goravel 实现的 Minecraft 皮肤托管平台后端，迁移自 `blessing-
 - **数据库**：SQLite / MySQL / MariaDB / PostgreSQL / SQL Server（与 Laravel 一致；矩阵见 [DB-MATRIX.md](./DB-MATRIX.md)）
 - **认证**：Session + Cookie / OAuth2（Passport 兼容）
 - **模板**：Go `html/template`
-- **前端**：webpack + yarn 1.x（复用现有）
+- **前端（双轨）**：
+  - `legacy`（默认）：复用 PHP 源项目预编译产物 `public/app` + webpack + yarn 1.x
+  - `next`（进行中）：React 19.3.1 + Vite 8.3.3，两套独立 SPA
+    （站点端 TDesign 1.18.6 / 管理端 antd 6.6.8），见 [FRONTEND-REBUILD-PLAN.md](./FRONTEND-REBUILD-PLAN.md)
 - **图像**：`image` + `golang.org/x/image` + WebP 编码（默认 WebP，`?png` 回退 PNG）
 
 ## 项目结构
@@ -152,6 +155,7 @@ PostgreSQL 5433 / WiltonDB 1433，设置对应 `DB_*` 后运行矩阵测试。
 - [PROGRESS.md](./PROGRESS.md) — 当前进度快照（每次会话结束更新）
 - [ACCEPTANCE.md](./ACCEPTANCE.md) — 验收清单（路由/数据/前端/插件/CI）
 - [DEPLOYMENT.md](./DEPLOYMENT.md) — 部署、反向代理、在线更新与从 PHP 迁移
+- [FRONTEND-REBUILD-PLAN.md](./FRONTEND-REBUILD-PLAN.md) — 前端重构计划（React 19.3 + Vite 8.3.3 / TDesign + antd）
 
 ## 硬约束
 
