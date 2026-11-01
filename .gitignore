@@ -4,8 +4,8 @@
 .env
 .env.*
 !.env.example
-storage
-tmp
+/storage/
+/tmp/
 vendor/
 node_modules/
 
