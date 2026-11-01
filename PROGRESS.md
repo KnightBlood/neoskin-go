@@ -32,7 +32,7 @@
 | Phase 5 安装向导 | 100% | `/setup` 欢迎页、数据库表单、信息表单、完成页（HTML）+ 建表/管理员/install.lock |
 | Phase 6 模板/页面 | 100% | 首页 + 认证页 + 用户中心 + 皮肤库 + 管理端全部页面（含通信可视化编辑器）+ i18n |
 | Phase 7 插件系统 | 70% | 清单/启停/删除/上传/wget/市场 + Go 原生 Hook/Filter/Event 运行时；PHP 插件代码执行仍不支持 |
-| Phase 8 测试/CI | 95% | 单测 + 四库矩阵 + Go HTTP E2E + GitHub Actions 全绿 + 浏览器 E2E（首页/登录/仪表盘/衣柜/角色/皮肤库/管理端/通信编辑器/安装向导） |
+| Phase 8 测试/CI | 100% | 单测 + 四库矩阵 + Go HTTP E2E + GitHub Actions 全绿 + 浏览器 E2E；新增 ACCEPTANCE/DEPLOYMENT/verify.ps1 |
 
 ## 3. 已完成的功能
 
@@ -65,6 +65,7 @@
 ## 5. 变更记录
 
 ### 2026-11-01（本轮）
+- 新增 `ACCEPTANCE.md`（HTTP/数据/前端契约/patch 功能/插件/CI 验收清单与已知限制）、`DEPLOYMENT.md`（构建/env/建表/前端资源/反向代理/迁移/更新/回滚）、`scripts/verify.ps1`。
 - 浏览器 E2E 修复：JSON `Content-Type` 去 charset（前端 fetch 严格匹配）、登录响应 `data.redirectTo`、admin `blessing-extra` 空对象、玩家/衣柜页补充 `#previewer` 与 rule/length/unverified、安装向导使用带 hash 的 CSS；新增 `scripts/copy-frontend.ps1` 复制预编译前端资源。
 - 新增 `.github/workflows/ci.yml`：build/vet/test + MySQL/MariaDB/PostgreSQL/SQL Server 四库矩阵；新增 `tests/e2e`（构建二进制 → 建表 → 启动 → 探测首页/认证/安装/语言包/API/头像/权限跳转）。
 - `BaseData` 增加 `ExtraHead` / `ExtraFoot`，`buildBaseData` 派发 `RenderingHeader` / `RenderingFooter`，页面 head/foot 输出插件追加内容。

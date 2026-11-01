@@ -150,6 +150,8 @@ PostgreSQL 5433 / WiltonDB 1433，设置对应 `DB_*` 后运行矩阵测试。
 - [AGENTS.md](./AGENTS.md) — agent 行为约束
 - [DB-MATRIX.md](./DB-MATRIX.md) — 五数据库矩阵与 Go/GORM 坑位
 - [PROGRESS.md](./PROGRESS.md) — 当前进度快照（每次会话结束更新）
+- [ACCEPTANCE.md](./ACCEPTANCE.md) — 验收清单（路由/数据/前端/插件/CI）
+- [DEPLOYMENT.md](./DEPLOYMENT.md) — 部署、反向代理、在线更新与从 PHP 迁移
 
 ## 硬约束
 
