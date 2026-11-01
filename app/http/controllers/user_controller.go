@@ -725,3 +725,52 @@ func (r *UserController) MessagePage(ctx goravelhttp.Context) goravelhttp.Respon
 	data.MessageTime = row.CreatedAt
 	return renderUserPage(ctx, "user_message", data, translator)
 }
+
+// ruleAndLength 返回角色名规则与长度提示（供玩家/衣柜页面 extra 使用）。
+func ruleAndLength(ctx goravelhttp.Context) (string, string) {
+	_, conn, dialect, err := currentUser(ctx)
+	if err != nil {
+		return "", ""
+	}
+	options := service.NewOption(conn, dialect)
+	translator := i18n.New(localeMiddleware.LocaleOf(ctx), nil)
+	rule := options.Get("player_name_rule")
+	if rule == "" {
+		rule = "official"
+	}
+	min := options.Int("player_name_length_min", 3)
+	max := options.Int("player_name_length_max", 16)
+	return translator.Trans("user.player.player-name-rule." + rule),
+		translator.Trans("user.player.player-name-length",
+			map[string]string{"min": fmt.Sprint(min), "max": fmt.Sprint(max)})
+}
+
+func playerPageExtra(ctx goravelhttp.Context) template.JS {
+	user, conn, dialect, err := currentUser(ctx)
+	if err != nil || user == nil {
+		return ""
+	}
+	rule, length := ruleAndLength(ctx)
+	count, _ := repo.NewPlayerRepository(conn, dialect).CountByUID(user.UID)
+	options := service.NewOption(conn, dialect)
+	encoded, _ := json.Marshal(map[string]any{
+		"count": count, "rule": rule, "length": length,
+		"unverified": options.Bool("require_verification", false) && !user.Verified,
+	})
+	return template.JS(encoded)
+}
+
+func closetPageExtra(ctx goravelhttp.Context) template.JS {
+	user, conn, dialect, err := currentUser(ctx)
+	if err != nil || user == nil {
+		return ""
+	}
+	rule, length := ruleAndLength(ctx)
+	options := service.NewOption(conn, dialect)
+	encoded, _ := json.Marshal(map[string]any{
+		"unverified": options.Bool("require_verification", false) && !user.Verified,
+		"rule":       rule,
+		"length":     length,
+	})
+	return template.JS(encoded)
+}

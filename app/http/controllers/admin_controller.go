@@ -74,6 +74,9 @@ func adminPageData(ctx goravelhttp.Context, titleKey string,
 	if admin.DarkMode {
 		sidebarColor = strings.ReplaceAll(sidebarColor, "light", "dark")
 	}
+	if extra == nil {
+		extra = map[string]any{}
+	}
 	extraJSON, _ := json.Marshal(extra)
 	data := &view.UserData{
 		BaseData:        buildBaseData(ctx, options, locale, siteName),

@@ -1,5 +1,8 @@
 {{define "user_closet"}}{{template "user-open" .}}
-          <div id="closet-list"></div>
+          <div class="row">
+            <div class="col-md-7"><div id="closet-list"></div></div>
+            <div class="col-md-5"><div id="previewer"></div></div>
+          </div>
           <div id="modals"></div>
           <script id="blessing-extra" type="application/json">{{.ExtraJSON}}</script>
 {{template "user-close" .}}{{end}}

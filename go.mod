@@ -4,6 +4,7 @@ go 1.26.0
 
 require (
 	github.com/HugoSmits86/nativewebp v1.3.0
+	github.com/gin-gonic/gin v1.12.0
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/goravel/framework v1.18.0
 	github.com/goravel/gin v1.18.0
@@ -60,7 +61,6 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
 	github.com/gin-contrib/timeout v1.2.1 // indirect
-	github.com/gin-gonic/gin v1.12.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect

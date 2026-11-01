@@ -328,10 +328,12 @@ func pairs(values []string) map[string]string {
 
 // SetupData 是安装向导页面（setup.*）的数据。
 type SetupData struct {
-	Locale  string
-	Title   string
-	CSRF    string
-	Version string
-	Error   string
-	Values  map[string]string
+	Locale     string
+	Title      string
+	CSRF       string
+	Version    string
+	Error      string
+	Values     map[string]string
+	StyleCSS   string
+	SpectreCSS string
 }

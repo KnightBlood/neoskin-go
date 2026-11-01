@@ -46,6 +46,7 @@ func Web() {
 	web := facades.Route().Middleware(
 		sessionmiddleware.StartSession(),
 		oauthmw.DetectLocale("zh_CN"),
+		oauthmw.NormalizeJSONContentType(),
 		// Laravel 的 api 中间件组不校验 CSRF；第三方以 Bearer token 调用 /api/* 时同样不带 CSRF。
 		httpmiddleware.VerifyCsrfToken([]string{"api", "api/*"}),
 	)

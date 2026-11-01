@@ -32,7 +32,7 @@
 | Phase 5 安装向导 | 100% | `/setup` 欢迎页、数据库表单、信息表单、完成页（HTML）+ 建表/管理员/install.lock |
 | Phase 6 模板/页面 | 100% | 首页 + 认证页 + 用户中心 + 皮肤库 + 管理端全部页面（含通信可视化编辑器）+ i18n |
 | Phase 7 插件系统 | 70% | 清单/启停/删除/上传/wget/市场 + Go 原生 Hook/Filter/Event 运行时；PHP 插件代码执行仍不支持 |
-| Phase 8 测试/CI | 85% | 单测 + 四库矩阵 + Go HTTP E2E（`tests/e2e`）+ GitHub Actions（build/vet/test + 4 DB 矩阵）；浏览器 E2E 仍需前端资源 |
+| Phase 8 测试/CI | 95% | 单测 + 四库矩阵 + Go HTTP E2E + GitHub Actions 全绿 + 浏览器 E2E（首页/登录/仪表盘/衣柜/角色/皮肤库/管理端/通信编辑器/安装向导） |
 
 ## 3. 已完成的功能
 
@@ -65,6 +65,7 @@
 ## 5. 变更记录
 
 ### 2026-11-01（本轮）
+- 浏览器 E2E 修复：JSON `Content-Type` 去 charset（前端 fetch 严格匹配）、登录响应 `data.redirectTo`、admin `blessing-extra` 空对象、玩家/衣柜页补充 `#previewer` 与 rule/length/unverified、安装向导使用带 hash 的 CSS；新增 `scripts/copy-frontend.ps1` 复制预编译前端资源。
 - 新增 `.github/workflows/ci.yml`：build/vet/test + MySQL/MariaDB/PostgreSQL/SQL Server 四库矩阵；新增 `tests/e2e`（构建二进制 → 建表 → 启动 → 探测首页/认证/安装/语言包/API/头像/权限跳转）。
 - `BaseData` 增加 `ExtraHead` / `ExtraFoot`，`buildBaseData` 派发 `RenderingHeader` / `RenderingFooter`，页面 head/foot 输出插件追加内容。
 - 新增安装向导页面：`setup_welcome` / `setup_database` / `setup_info` / `setup_finish`（Spectre 表单 + CSRF + 当前值回填）。

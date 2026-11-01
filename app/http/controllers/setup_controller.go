@@ -290,11 +290,13 @@ func renderSetupPage(ctx goravelhttp.Context, page, titleKey string,
 	locale := localeMiddleware.LocaleOf(ctx)
 	translator := i18n.New(locale, nil)
 	data := view.SetupData{
-		Locale:  locale,
-		Title:   translator.Trans(titleKey),
-		CSRF:    csrfToken(ctx),
-		Version: facades.Config().GetString("app.version", "6.0.11_patch"),
-		Values:  values,
+		Locale:     locale,
+		Title:      translator.Trans(titleKey),
+		CSRF:       csrfToken(ctx),
+		Version:    facades.Config().GetString("app.version", "6.0.11_patch"),
+		Values:     values,
+		StyleCSS:   view.AssetURL("", view.Asset("style.", ".css", "style.1dd8a8a.css")),
+		SpectreCSS: view.AssetURL("", view.Asset("spectre.", ".css", "spectre.e885dd0.css")),
 	}
 	body, err := view.Render(page, data, translator)
 	if err != nil {

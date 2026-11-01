@@ -70,6 +70,7 @@ func (r *AuthController) Login(ctx goravelhttp.Context) goravelhttp.Response {
 			if player.Permission == model.PermissionBanned {
 				return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
 					"code": 1, "message": "This user has been banned.",
+					"data": goravelhttp.Json{"login_fails": 1},
 				})
 			}
 			user, err = users.FindByID(player.UID)
@@ -98,7 +99,8 @@ func (r *AuthController) Login(ctx goravelhttp.Context) goravelhttp.Response {
 	plugin.DefaultDispatcher.Dispatch(plugin.Event{Name: plugin.EventUserAuthenticated, Payload: user.UID})
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Logged in.", "data": goravelhttp.Json{"uid": user.UID},
+		"code": 0, "message": "Logged in.",
+		"data": goravelhttp.Json{"uid": user.UID, "redirectTo": "/user"},
 	})
 }
 
