@@ -81,5 +81,11 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.26"
+      - name: Create SQL Server database
+        if: matrix.db == 'sqlsrv'
+        run: >-
+          docker exec ${{ job.services.database.id }}
+          /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa
+          -P "${{ matrix.password }}" -Q "CREATE DATABASE blessingskin"
       - run: go test ./internal/db -run TestMatrix -v -count=1
       - run: go test ./internal/repo -run TestRepositoriesMatrix -v -count=1
