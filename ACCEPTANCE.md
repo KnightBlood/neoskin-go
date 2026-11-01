@@ -77,7 +77,7 @@
 
 1. **PHP 插件不可执行**：仅提供 Go 原生 Hook/Filter/Event 扩展点；PHP 插件需改写为 Go 扩展。
 2. **PHP session cookie 加密未实现**：使用 Goravel session；签名 URL 与 `laravel_token` 已兼容。
-3. **翻译覆盖**：页面/语言包走 YAML + `language_lines` 覆盖；部分 API 错误消息仍为硬编码中英文。
+3. **翻译覆盖**：页面/语言包与业务 API 消息走 YAML + `language_lines` 覆盖；Laravel 通用校验消息（422 `The given data was invalid.` 与字段错误）仍沿用 Laravel 英文默认。
 4. **安装向导**：写入 `.env` 后需重启进程（Goravel 启动时加载配置）。
 5. **`_ignition`**：仅 debug + local/development 启用，`execute-solution` 恒 404（无解决方案注册表）。
 6. **浏览器 E2E 未进 CI**：CI 目前运行服务端 HTTP E2E；浏览器 E2E 需先复制 `public/app`。

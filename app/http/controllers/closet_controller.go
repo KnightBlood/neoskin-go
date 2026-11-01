@@ -166,7 +166,7 @@ func (r *ClosetController) Add(ctx goravelhttp.Context) goravelhttp.Response {
 	cost := options.Int("score_per_closet_item", 0)
 	if user.Score < cost {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "You do not have enough score.",
+			"code": 1, "message": t(ctx, "user.closet.add.lack-score"),
 		})
 	}
 
@@ -176,17 +176,17 @@ func (r *ClosetController) Add(ctx goravelhttp.Context) goravelhttp.Response {
 	}
 	if texture == nil {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "Texture not found.",
+			"code": 1, "message": t(ctx, "user.closet.add.not-found"),
 		})
 	}
 	if !texture.Public && texture.Uploader != user.UID && !user.IsAdmin() {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "This texture is private.",
+			"code": 1, "message": t(ctx, "skinlib.show.private"),
 		})
 	}
 	if exists, _ := closet.InCloset(user.UID, tid); exists {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "This texture is already in your closet.",
+			"code": 1, "message": t(ctx, "user.closet.add.repeated"),
 		})
 	}
 
@@ -203,7 +203,7 @@ func (r *ClosetController) Add(ctx goravelhttp.Context) goravelhttp.Response {
 	}
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Added to closet.",
+		"code": 0, "message": t(ctx, "user.closet.add.success", "name", name),
 	})
 }
 
@@ -234,7 +234,7 @@ func (r *ClosetController) Rename(ctx goravelhttp.Context) goravelhttp.Response 
 	}
 	if item == nil {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "Item not found in your closet.",
+			"code": 1, "message": t(ctx, "user.closet.remove.non-existent"),
 		})
 	}
 	if err := closet.RenameItem(user.UID, tid, name); err != nil {
@@ -242,7 +242,7 @@ func (r *ClosetController) Rename(ctx goravelhttp.Context) goravelhttp.Response 
 	}
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Item renamed.",
+		"code": 0, "message": t(ctx, "user.closet.rename.success", "name", name),
 	})
 }
 
@@ -270,7 +270,7 @@ func (r *ClosetController) Remove(ctx goravelhttp.Context) goravelhttp.Response 
 	}
 	if item == nil {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "Item not found in your closet.",
+			"code": 1, "message": t(ctx, "user.closet.remove.non-existent"),
 		})
 	}
 
@@ -289,7 +289,7 @@ func (r *ClosetController) Remove(ctx goravelhttp.Context) goravelhttp.Response 
 	}
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Removed from closet.",
+		"code": 0, "message": t(ctx, "user.closet.remove.success"),
 	})
 }
 

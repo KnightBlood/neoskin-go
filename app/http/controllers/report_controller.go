@@ -75,7 +75,7 @@ func (r *ReportController) Submit(ctx goravelhttp.Context) goravelhttp.Response 
 	reports := repo.NewReportRepository(conn, dialect)
 	if exists, _ := reports.Exists(user.UID, tid); exists {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "You have already reported this texture.",
+			"code": 1, "message": t(ctx, "skinlib.report.duplicate"),
 		})
 	}
 
@@ -83,7 +83,7 @@ func (r *ReportController) Submit(ctx goravelhttp.Context) goravelhttp.Response 
 	score := options.Int("reporter_score_modification", 0)
 	if score < 0 && user.Score < -score {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "You do not have enough score.",
+			"code": 1, "message": t(ctx, "skinlib.upload.lack-score"),
 		})
 	}
 
@@ -93,7 +93,7 @@ func (r *ReportController) Submit(ctx goravelhttp.Context) goravelhttp.Response 
 	_ = repo.NewUserRepository(conn, dialect).UpdateScore(user.UID, user.Score+score)
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Report submitted.",
+		"code": 0, "message": t(ctx, "skinlib.report.success"),
 	})
 }
 
@@ -190,7 +190,7 @@ func (r *ReportController) Review(ctx goravelhttp.Context) goravelhttp.Response 
 		}
 		_ = reports.UpdateStatus(report.ID, repo.ReportRejected)
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 0, "message": "Report rejected.", "data": goravelhttp.Json{"status": repo.ReportRejected},
+			"code": 0, "message": t(ctx, "general.op-success"), "data": goravelhttp.Json{"status": repo.ReportRejected},
 		})
 	}
 
@@ -206,7 +206,7 @@ func (r *ReportController) Review(ctx goravelhttp.Context) goravelhttp.Response 
 			returnScore(users, options, report)
 			_ = reports.UpdateStatus(report.ID, repo.ReportResolved)
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 0, "message": "Texture already deleted.",
+				"code": 0, "message": t(ctx, "general.texture-deleted"),
 				"data": goravelhttp.Json{"status": repo.ReportResolved},
 			})
 		}
@@ -214,12 +214,12 @@ func (r *ReportController) Review(ctx goravelhttp.Context) goravelhttp.Response 
 		uploader, _ := users.FindByID(report.Uploader)
 		if uploader == nil {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 1, "message": "User not found.",
+				"code": 1, "message": t(ctx, "admin.users.operations.non-existent"),
 			})
 		}
 		if admin.Permission <= uploader.Permission {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 1, "message": "No permission.",
+				"code": 1, "message": t(ctx, "admin.users.operations.no-permission"),
 			})
 		}
 		if err := users.UpdatePermission(uploader.UID, model.PermissionBanned); err != nil {
@@ -235,7 +235,7 @@ func (r *ReportController) Review(ctx goravelhttp.Context) goravelhttp.Response 
 	_ = reports.UpdateStatus(report.ID, repo.ReportResolved)
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Report resolved.",
+		"code": 0, "message": t(ctx, "general.op-success"),
 		"data": goravelhttp.Json{"status": repo.ReportResolved},
 	})
 }

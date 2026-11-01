@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"database/sql"
+	"fmt"
 	nethttp "net/http"
 
 	goravelhttp "github.com/goravel/framework/contracts/http"
@@ -60,13 +61,13 @@ func (r *AdminPlayersController) Name(ctx goravelhttp.Context) goravelhttp.Respo
 	players := repo.NewPlayerRepository(conn, dialect)
 	if existing, _ := players.FindDetailByName(name); existing != nil && existing.PID != player.PID {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "This player name is already taken.",
+			"code": 1, "message": t(ctx, "user.player.rename.repeated"),
 		})
 	}
 	if err := players.UpdateName(player.PID, name); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
-	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": "Player renamed."})
+	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": t(ctx, "admin.players.name.success", "player", name)})
 }
 
 // Owner 处理 PUT /admin/players/{player}/owner。
@@ -86,14 +87,14 @@ func (r *AdminPlayersController) Owner(ctx goravelhttp.Context) goravelhttp.Resp
 	}
 	if owner == nil {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "User not found.",
+			"code": 1, "message": t(ctx, "admin.users.operations.non-existent"),
 		})
 	}
 	if err := repo.NewPlayerRepository(conn, dialect).UpdateOwner(player.PID, uid); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Player owner updated.",
+		"code": 0, "message": t(ctx, "admin.players.owner.success", "player", player.Name, "user", owner.Nickname),
 	})
 }
 
@@ -115,7 +116,7 @@ func (r *AdminPlayersController) Texture(ctx goravelhttp.Context) goravelhttp.Re
 		}
 		if texture == nil {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 1, "message": "Texture not found.",
+				"code": 1, "message": t(ctx, "admin.players.textures.non-existent", "tid", fmt.Sprint(tid)),
 			})
 		}
 	}
@@ -130,7 +131,7 @@ func (r *AdminPlayersController) Texture(ctx goravelhttp.Context) goravelhttp.Re
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Player texture updated.",
+		"code": 0, "message": t(ctx, "admin.players.textures.success", "player", player.Name),
 	})
 }
 
@@ -143,7 +144,7 @@ func (r *AdminPlayersController) Delete(ctx goravelhttp.Context) goravelhttp.Res
 	if err := repo.NewPlayerRepository(conn, dialect).Delete(player.PID); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
-	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": "Player deleted."})
+	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": t(ctx, "admin.players.delete.success")})
 }
 
 func (r *AdminPlayersController) target(ctx goravelhttp.Context) (*model.PlayerDetail,

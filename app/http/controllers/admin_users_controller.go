@@ -70,7 +70,7 @@ func (r *AdminUsersController) Email(ctx goravelhttp.Context) goravelhttp.Respon
 	if err := users.UpdateEmail(target.UID, email); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
-	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": "Email updated."})
+	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": t(ctx, "admin.users.operations.email.success")})
 }
 
 // Nickname 处理 PUT /admin/users/{user}/nickname。
@@ -88,7 +88,7 @@ func (r *AdminUsersController) Nickname(ctx goravelhttp.Context) goravelhttp.Res
 	if err := repo.NewUserRepository(conn, dialect).UpdateNickname(target.UID, nickname); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
-	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": "Nickname updated."})
+	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": t(ctx, "admin.users.operations.nickname.success", "new", nickname)})
 }
 
 // Password 处理 PUT /admin/users/{user}/password。
@@ -110,7 +110,7 @@ func (r *AdminUsersController) Password(ctx goravelhttp.Context) goravelhttp.Res
 	if err := repo.NewUserRepository(conn, dialect).UpdatePassword(target.UID, hashed); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
-	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": "Password updated."})
+	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": t(ctx, "admin.users.operations.password.success")})
 }
 
 // Permission 处理 PUT /admin/users/{user}/permission。
@@ -135,7 +135,7 @@ func (r *AdminUsersController) Permission(ctx goravelhttp.Context) goravelhttp.R
 	if err := repo.NewUserRepository(conn, dialect).UpdatePermission(target.UID, permission); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
-	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": "Permission updated."})
+	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": t(ctx, "admin.users.operations.permission")})
 }
 
 // Score 处理 PUT /admin/users/{user}/score。
@@ -148,7 +148,7 @@ func (r *AdminUsersController) Score(ctx goravelhttp.Context) goravelhttp.Respon
 	if err := repo.NewUserRepository(conn, dialect).UpdateScore(target.UID, score); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
-	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": "Score updated."})
+	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": t(ctx, "admin.users.operations.score.success")})
 }
 
 // Verification 处理 PUT /admin/users/{user}/verification（切换）。
@@ -160,7 +160,7 @@ func (r *AdminUsersController) Verification(ctx goravelhttp.Context) goravelhttp
 	if err := repo.NewUserRepository(conn, dialect).UpdateVerified(target.UID, !target.Verified); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
-	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": "Verification updated."})
+	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": t(ctx, "admin.users.operations.verification.success")})
 }
 
 // Delete 处理 DELETE /admin/users/{user}。
@@ -172,7 +172,7 @@ func (r *AdminUsersController) Delete(ctx goravelhttp.Context) goravelhttp.Respo
 	if err := repo.NewUserRepository(conn, dialect).Delete(target.UID); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
-	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": "User deleted."})
+	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": t(ctx, "admin.users.operations.delete.success")})
 }
 
 func (r *AdminUsersController) target(ctx goravelhttp.Context) (*model.User, *model.User,

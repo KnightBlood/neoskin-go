@@ -310,7 +310,7 @@ func (r *SkinlibController) Delete(ctx goravelhttp.Context) goravelhttp.Response
 	}
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Texture deleted.",
+		"code": 0, "message": t(ctx, "skinlib.delete.success"),
 	})
 }
 
@@ -339,19 +339,23 @@ func (r *SkinlibController) Privacy(ctx goravelhttp.Context) goravelhttp.Respons
 	}
 	if uploader.Score+diff < 0 {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "You do not have enough score.",
+			"code": 1, "message": t(ctx, "skinlib.upload.lack-score"),
 		})
 	}
 
 	if !texture.Public {
 		if duplicated, _ := textures.FindByHash(texture.Hash); duplicated != nil && duplicated.Public {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 2, "message": "A public texture with the same hash exists.",
+				"code": 2, "message": t(ctx, "skinlib.upload.repeated"),
 				"data": goravelhttp.Json{"tid": duplicated.Tid},
 			})
 		}
 	}
 
+	privacyLabel := t(ctx, "general.private")
+	if !texture.Public {
+		privacyLabel = t(ctx, "general.public")
+	}
 	if err := users.UpdateScore(uploader.UID, uploader.Score+diff); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
@@ -360,7 +364,7 @@ func (r *SkinlibController) Privacy(ctx goravelhttp.Context) goravelhttp.Respons
 	}
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Privacy updated.",
+		"code": 0, "message": t(ctx, "skinlib.privacy.success", "privacy", privacyLabel),
 	})
 }
 
@@ -378,7 +382,7 @@ func (r *SkinlibController) Rename(ctx goravelhttp.Context) goravelhttp.Response
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Texture renamed.",
+		"code": 0, "message": t(ctx, "skinlib.rename.success", "name", name),
 	})
 }
 
@@ -398,7 +402,7 @@ func (r *SkinlibController) Type(ctx goravelhttp.Context) goravelhttp.Response {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Texture type updated.",
+		"code": 0, "message": t(ctx, "skinlib.model.success", "model", textureType),
 	})
 }
 
@@ -431,7 +435,7 @@ func (r *SkinlibController) textureForManage(ctx goravelhttp.Context) (*model.Te
 	}
 	if user.UID != texture.Uploader && !user.IsAdmin() {
 		return nil, nil, nil, nil, ctx.Response().Json(nethttp.StatusForbidden,
-			goravelhttp.Json{"code": 1, "message": "No permission."})
+			goravelhttp.Json{"code": 1, "message": t(ctx, "skinlib.no-permission")})
 	}
 	return texture, user, conn, dialect, nil
 }
@@ -490,24 +494,24 @@ func (r *SkinlibController) Upload(ctx goravelhttp.Context) goravelhttp.Response
 	if width > maxWidth {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
 			"code":    1,
-			"message": fmt.Sprintf("Texture width %d exceeds maximum %d.", width, maxWidth),
+			"message": t(ctx, "skinlib.upload.too-wide", "width", fmt.Sprint(width), "maxWidth", fmt.Sprint(maxWidth)),
 		})
 	}
 	if width%64 != 0 || height%32 != 0 {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "Invalid texture size.",
+			"code": 1, "message": t(ctx, "skinlib.upload.invalid-size", "type", textureType, "width", fmt.Sprint(width), "height", fmt.Sprint(height)),
 		})
 	}
 	ratio := float64(width) / float64(height)
 	if textureType == "cape" {
 		if ratio != 2 {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 1, "message": "Invalid cape size.",
+				"code": 1, "message": t(ctx, "skinlib.upload.invalid-size", "type", textureType, "width", fmt.Sprint(width), "height", fmt.Sprint(height)),
 			})
 		}
 	} else if (ratio != 2 && ratio != 1) || (textureType == "alex" && ratio == 2) {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "Invalid skin size.",
+			"code": 1, "message": t(ctx, "skinlib.upload.invalid-size", "type", textureType, "width", fmt.Sprint(width), "height", fmt.Sprint(height)),
 		})
 	}
 
@@ -521,7 +525,7 @@ func (r *SkinlibController) Upload(ctx goravelhttp.Context) goravelhttp.Response
 	textures := repo.NewTextureRepository(conn, dialect)
 	if duplicated, _ := textures.FindPublicOrMine(hash, user.UID); duplicated != nil {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 2, "message": "This texture has already been uploaded.",
+			"code": 2, "message": t(ctx, "skinlib.upload.repeated"),
 			"data": goravelhttp.Json{"tid": duplicated.Tid},
 		})
 	}
@@ -539,7 +543,7 @@ func (r *SkinlibController) Upload(ctx goravelhttp.Context) goravelhttp.Response
 	cost -= options.Int("score_award_per_texture", 0)
 	if user.Score < cost {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "You do not have enough score.",
+			"code": 1, "message": t(ctx, "skinlib.upload.lack-score"),
 		})
 	}
 
@@ -561,7 +565,7 @@ func (r *SkinlibController) Upload(ctx goravelhttp.Context) goravelhttp.Response
 	}
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": fmt.Sprintf("Texture %s uploaded.", name),
+		"code": 0, "message": t(ctx, "skinlib.upload.success", "name", name),
 		"data": goravelhttp.Json{"tid": tid},
 	})
 }

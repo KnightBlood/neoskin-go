@@ -53,7 +53,7 @@ func (r *SetupController) Show(ctx goravelhttp.Context) goravelhttp.Response {
 
 func lockedResponse(ctx goravelhttp.Context) goravelhttp.Response {
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"installed": true, "message": "Blessing Skin has been installed.",
+		"installed": true, "message": t(ctx, "setup.locked.text"),
 	})
 }
 

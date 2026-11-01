@@ -272,7 +272,7 @@ func (r *AdminOptionsController) handle(ctx goravelhttp.Context, keys []string) 
 	}
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Options saved.",
+		"code": 0, "message": t(ctx, "options.option-saved"),
 	})
 }
 

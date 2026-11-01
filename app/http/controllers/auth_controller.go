@@ -69,7 +69,7 @@ func (r *AuthController) Login(ctx goravelhttp.Context) goravelhttp.Response {
 		if player != nil {
 			if player.Permission == model.PermissionBanned {
 				return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-					"code": 1, "message": "This user has been banned.",
+					"code": 1, "message": t(ctx, "auth.check.banned"),
 					"data": goravelhttp.Json{"login_fails": 1},
 				})
 			}
@@ -82,13 +82,13 @@ func (r *AuthController) Login(ctx goravelhttp.Context) goravelhttp.Response {
 
 	if user == nil || !php.VerifyPassword(user.Password, password) {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "Wrong password.",
+			"code": 1, "message": t(ctx, "auth.validation.password"),
 			"data": goravelhttp.Json{"login_fails": 1},
 		})
 	}
 	if user.Permission == model.PermissionBanned {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "This user has been banned.",
+			"code": 1, "message": t(ctx, "auth.check.banned"),
 		})
 	}
 
@@ -99,7 +99,7 @@ func (r *AuthController) Login(ctx goravelhttp.Context) goravelhttp.Response {
 	plugin.DefaultDispatcher.Dispatch(plugin.Event{Name: plugin.EventUserAuthenticated, Payload: user.UID})
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Logged in.",
+		"code": 0, "message": t(ctx, "auth.login.success"),
 		"data": goravelhttp.Json{"uid": user.UID, "redirectTo": "/user"},
 	})
 }
@@ -111,7 +111,7 @@ func (r *AuthController) Logout(ctx goravelhttp.Context) goravelhttp.Response {
 	}
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "You are now logged out.",
+		"code": 0, "message": t(ctx, "auth.logout.success"),
 	})
 }
 
@@ -237,7 +237,7 @@ func (r *AuthController) Register(ctx goravelhttp.Context) goravelhttp.Response 
 	if withPlayer {
 		if existing, _ := players.FindDetailByName(playerName); existing != nil {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 1, "message": "This player name is already taken.",
+				"code": 1, "message": t(ctx, "user.player.add.repeated"),
 			})
 		}
 	}
@@ -245,7 +245,7 @@ func (r *AuthController) Register(ctx goravelhttp.Context) goravelhttp.Response 
 	regsPerIP := options.Int("regs_per_ip", 3)
 	if count, _ := users.CountByIP(ctx.Request().Ip()); count >= regsPerIP {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": fmt.Sprintf("You can only register %d accounts per IP.", regsPerIP),
+			"code": 1, "message": t(ctx, "auth.register.max", "regs", fmt.Sprint(regsPerIP)),
 		})
 	}
 
@@ -277,7 +277,7 @@ func (r *AuthController) Register(ctx goravelhttp.Context) goravelhttp.Response 
 	plugin.DefaultDispatcher.Dispatch(plugin.Event{Name: plugin.EventUserLoggedIn, Payload: uid})
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Your account was registered. Redirecting...",
+		"code": 0, "message": t(ctx, "auth.register.success"),
 		"data": goravelhttp.Json{"uid": uid},
 	})
 }

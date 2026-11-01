@@ -51,7 +51,7 @@ func (r *AuthController) HandleForgot(ctx goravelhttp.Context) goravelhttp.Respo
 	if last := facades.Cache().GetInt(cacheKey, 0); last > 0 {
 		if remain := 180 + last - int(time.Now().Unix()); remain > 0 {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 2, "message": "你邮件发送得太频繁啦，过会儿再点发送吧",
+				"code": 2, "message": t(ctx, "auth.forgot.frequent-mail"),
 			})
 		}
 	}
@@ -62,7 +62,7 @@ func (r *AuthController) HandleForgot(ctx goravelhttp.Context) goravelhttp.Respo
 	}
 	if user == nil {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "该邮箱尚未注册",
+			"code": 1, "message": t(ctx, "auth.forgot.unregistered"),
 		})
 	}
 
@@ -80,12 +80,12 @@ func (r *AuthController) HandleForgot(ctx goravelhttp.Context) goravelhttp.Respo
 		"<p>如果您并没有访问过我们的网站，或没有进行上述操作，请忽略这封邮件。</p>"
 	if err := sendMail(email, "重置您在 "+siteName+" 上的账户密码", body); err != nil {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 2, "message": "邮件发送失败，详细信息：" + err.Error(),
+			"code": 2, "message": t(ctx, "auth.forgot.failed", "msg", err.Error()),
 		})
 	}
 	_ = facades.Cache().Put(cacheKey, int(time.Now().Unix()), time.Hour)
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "邮件已发送，一小时内有效，请注意查收。",
+		"code": 0, "message": t(ctx, "auth.forgot.success"),
 	})
 }
 
@@ -93,7 +93,7 @@ func (r *AuthController) HandleForgot(ctx goravelhttp.Context) goravelhttp.Respo
 func (r *AuthController) Reset(ctx goravelhttp.Context) goravelhttp.Response {
 	if !validSignedRequest(ctx) {
 		return ctx.Response().Json(nethttp.StatusForbidden, goravelhttp.Json{
-			"message": "无效的链接",
+			"message": t(ctx, "auth.reset.invalid"),
 		})
 	}
 	_, conn, dialect, err := currentUser(ctx)
@@ -115,7 +115,7 @@ func (r *AuthController) Reset(ctx goravelhttp.Context) goravelhttp.Response {
 func (r *AuthController) HandleReset(ctx goravelhttp.Context) goravelhttp.Response {
 	if !validSignedRequest(ctx) {
 		return ctx.Response().Json(nethttp.StatusForbidden, goravelhttp.Json{
-			"message": "无效的链接",
+			"message": t(ctx, "auth.reset.invalid"),
 		})
 	}
 	password := ctx.Request().Input("password")
@@ -144,7 +144,7 @@ func (r *AuthController) HandleReset(ctx goravelhttp.Context) goravelhttp.Respon
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "密码重置成功",
+		"code": 0, "message": t(ctx, "auth.reset.success"),
 	})
 }
 
@@ -156,12 +156,12 @@ func (r *AuthController) Verify(ctx goravelhttp.Context) goravelhttp.Response {
 	}
 	if !service.NewOption(conn, dialect).Bool("require_verification", false) {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "邮箱验证已关闭",
+			"code": 1, "message": t(ctx, "user.verification.disabled"),
 		})
 	}
 	if !validSignedRequest(ctx) {
 		return ctx.Response().Json(nethttp.StatusForbidden, goravelhttp.Json{
-			"message": "无效的链接",
+			"message": t(ctx, "auth.verify.invalid"),
 		})
 	}
 	return renderAuthPage(ctx, "auth_verify", "auth.verify.title", map[string]any{},
@@ -172,7 +172,7 @@ func (r *AuthController) Verify(ctx goravelhttp.Context) goravelhttp.Response {
 func (r *AuthController) HandleVerify(ctx goravelhttp.Context) goravelhttp.Response {
 	if !validSignedRequest(ctx) {
 		return ctx.Response().Json(nethttp.StatusForbidden, goravelhttp.Json{
-			"message": "无效的链接",
+			"message": t(ctx, "auth.verify.invalid"),
 		})
 	}
 	email := strings.TrimSpace(ctx.Request().Input("email"))
@@ -195,7 +195,7 @@ func (r *AuthController) HandleVerify(ctx goravelhttp.Context) goravelhttp.Respo
 	}
 	if !strings.EqualFold(user.Email, email) {
 		return ctx.Response().Json(nethttp.StatusUnprocessableEntity, goravelhttp.Json{
-			"message": "邮箱不匹配",
+			"message": t(ctx, "auth.verify.not-matched"),
 			"errors": goravelhttp.Json{
 				"email": []string{"邮箱不匹配"},
 			},
@@ -271,7 +271,7 @@ func (r *AuthController) SendVerification(ctx goravelhttp.Context) goravelhttp.R
 	options := service.NewOption(conn, dialect)
 	if !options.Bool("require_verification", false) {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "邮箱验证已关闭",
+			"code": 1, "message": t(ctx, "user.verification.disabled"),
 		})
 	}
 	session := ctx.Request().Session()
@@ -283,12 +283,12 @@ func (r *AuthController) SendVerification(ctx goravelhttp.Context) goravelhttp.R
 	}
 	if remain := 60 + last - int(time.Now().Unix()); remain > 0 {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "你邮件发送得太频繁啦，过会儿再点发送吧",
+			"code": 1, "message": t(ctx, "user.verification.frequent-mail"),
 		})
 	}
 	if user.Verified {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "你的邮箱已经验证过了",
+			"code": 1, "message": t(ctx, "user.verification.verified"),
 		})
 	}
 
@@ -304,14 +304,14 @@ func (r *AuthController) SendVerification(ctx goravelhttp.Context) goravelhttp.R
 		"<p>如果您并没有注册 " + siteName + "，请忽略这封邮件。</p>"
 	if err := sendMail(user.Email, "验证您在 "+siteName+" 上的邮箱", body); err != nil {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 2, "message": "邮件发送失败，详细信息：" + err.Error(),
+			"code": 2, "message": t(ctx, "user.verification.failed", "msg", err.Error()),
 		})
 	}
 	if session != nil {
 		session.Put("last_mail_time", int(time.Now().Unix()))
 	}
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "验证邮件已发送，请注意查收。",
+		"code": 0, "message": t(ctx, "user.verification.success"),
 	})
 }
 

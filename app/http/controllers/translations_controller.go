@@ -108,7 +108,7 @@ func (r *TranslationsController) Update(ctx goravelhttp.Context) goravelhttp.Res
 	if err := lines.UpdateText(id, locale, text); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
-	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": "Translation updated."})
+	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": t(ctx, "admin.i18n.updated")})
 }
 
 // Delete 处理 DELETE /admin/i18n/{line}。
@@ -125,7 +125,7 @@ func (r *TranslationsController) Delete(ctx goravelhttp.Context) goravelhttp.Res
 	if err := lines.Delete(id); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
-	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": "Translation deleted."})
+	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": t(ctx, "admin.i18n.deleted")})
 }
 
 func parseTranslations(raw string) map[string]any {

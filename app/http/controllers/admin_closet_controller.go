@@ -65,14 +65,14 @@ func (r *AdminClosetController) Add(ctx goravelhttp.Context) goravelhttp.Respons
 	}
 	if texture == nil {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "Texture not found.",
+			"code": 1, "message": t(ctx, "user.closet.add.not-found"),
 		})
 	}
 
 	closet := repo.NewClosetRepository(users.DB, users.Dialect)
 	if exists, _ := closet.InCloset(target.UID, tid); exists {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "This texture is already in your closet.",
+			"code": 1, "message": t(ctx, "user.closet.add.repeated"),
 		})
 	}
 	if err := closet.Add(target.UID, tid, texture.Name); err != nil {
@@ -101,7 +101,7 @@ func (r *AdminClosetController) Remove(ctx goravelhttp.Context) goravelhttp.Resp
 	}
 	if item == nil {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "Item not found in your closet.",
+			"code": 1, "message": t(ctx, "user.closet.remove.non-existent"),
 		})
 	}
 	if err := closet.Remove(target.UID, tid); err != nil {

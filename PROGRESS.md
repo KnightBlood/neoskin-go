@@ -65,6 +65,7 @@
 ## 5. 变更记录
 
 ### 2026-11-01（本轮）
+- API 错误/成功消息接入语言包：新增 `t(ctx,key,...)` 请求级翻译器（locale + `language_lines` 覆盖），覆盖认证/找回/资料/玩家/衣柜/皮肤库/举报/管理端/插件/市场/更新等消息；实测 `?lang=zh_CN` 与 `?lang=en` 返回对应文案。
 - 新增 `ACCEPTANCE.md`（HTTP/数据/前端契约/patch 功能/插件/CI 验收清单与已知限制）、`DEPLOYMENT.md`（构建/env/建表/前端资源/反向代理/迁移/更新/回滚）、`scripts/verify.ps1`。
 - 浏览器 E2E 修复：JSON `Content-Type` 去 charset（前端 fetch 严格匹配）、登录响应 `data.redirectTo`、admin `blessing-extra` 空对象、玩家/衣柜页补充 `#previewer` 与 rule/length/unverified、安装向导使用带 hash 的 CSS；新增 `scripts/copy-frontend.ps1` 复制预编译前端资源。
 - 新增 `.github/workflows/ci.yml`：build/vet/test + MySQL/MariaDB/PostgreSQL/SQL Server 四库矩阵；新增 `tests/e2e`（构建二进制 → 建表 → 启动 → 探测首页/认证/安装/语言包/API/头像/权限跳转）。

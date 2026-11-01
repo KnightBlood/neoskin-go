@@ -60,7 +60,7 @@ func (r *PluginController) Manage(ctx goravelhttp.Context) goravelhttp.Response 
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
 	if item == nil {
-		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 1, "message": "Plugin not found."})
+		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 1, "message": t(ctx, "admin.plugins.operations.not-found")})
 	}
 	switch ctx.Request().Input("action") {
 	case "enable":
@@ -70,21 +70,21 @@ func (r *PluginController) Manage(ctx goravelhttp.Context) goravelhttp.Response 
 			return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 		}
 		plugin.DefaultDispatcher.Dispatch(plugin.Event{Name: plugin.EventPluginWasEnabled, Payload: name})
-		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": "Plugin enabled."})
+		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": t(ctx, "admin.plugins.operations.enabled", "plugin", name)})
 	case "disable":
 		if err := manager.SetEnabled(name, false); err != nil {
 			return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 		}
 		plugin.DefaultDispatcher.Dispatch(plugin.Event{Name: plugin.EventPluginWasDisabled, Payload: name})
-		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": "Plugin disabled."})
+		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": t(ctx, "admin.plugins.operations.disabled", "plugin", name)})
 	case "delete":
 		if err := manager.Delete(name); err != nil {
 			return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 		}
 		plugin.DefaultDispatcher.Dispatch(plugin.Event{Name: plugin.EventPluginWasDeleted, Payload: name})
-		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": "Plugin deleted."})
+		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": t(ctx, "admin.plugins.operations.deleted")})
 	}
-	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 1, "message": "Invalid action."})
+	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 1, "message": t(ctx, "admin.invalid-action")})
 }
 
 func (r *PluginController) Readme(ctx goravelhttp.Context) goravelhttp.Response {
@@ -122,7 +122,7 @@ func (r *PluginController) Upload(ctx goravelhttp.Context) goravelhttp.Response 
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 1, "message": err.Error()})
 	}
 	_ = os.Remove(upload.File())
-	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": "Plugin installed."})
+	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": t(ctx, "admin.plugins.market.install-success")})
 }
 
 func (r *PluginController) Wget(ctx goravelhttp.Context) goravelhttp.Response {
@@ -149,7 +149,7 @@ func (r *PluginController) Wget(ctx goravelhttp.Context) goravelhttp.Response {
 	if err := manager.ExtractZip(path); err != nil {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 1, "message": err.Error()})
 	}
-	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": "Plugin installed."})
+	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{"code": 0, "message": t(ctx, "admin.plugins.market.install-success")})
 }
 
 func hasReadme(manager *plugin.Manager, item plugin.Plugin) bool {

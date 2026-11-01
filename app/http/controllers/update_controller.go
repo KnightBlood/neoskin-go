@@ -158,14 +158,14 @@ func (r *UpdateController) Download(ctx goravelhttp.Context) goravelhttp.Respons
 	current := facades.Config().GetString("app.version", "6.0.11_patch")
 	if info == nil || update.Compare(info.Latest, current) <= 0 || info.URL == "" {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "Your system is up to date.",
+			"code": 1, "message": t(ctx, "admin.update.info.up-to-date"),
 		})
 	}
 
 	path, status, err := downloadToTemp(info.URL)
 	if err != nil {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": fmt.Sprintf("Download failed (HTTP status code: %d).", status),
+			"code": 1, "message": t(ctx, "admin.download.errors.download", "error", fmt.Sprint(status)),
 		})
 	}
 	defer os.Remove(path)
@@ -211,7 +211,7 @@ func (r *UpdateController) Download(ctx goravelhttp.Context) goravelhttp.Respons
 	}
 	removeCaches()
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Update completed.",
+		"code": 0, "message": t(ctx, "admin.update.complete"),
 	})
 }
 

@@ -85,7 +85,7 @@ func (r *UserController) HandleProfile(ctx goravelhttp.Context) goravelhttp.Resp
 		plugin.DefaultDispatcher.Dispatch(plugin.Event{Name: plugin.EventUserProfileUpdated,
 			Payload: map[string]any{"uid": user.UID, "action": "nickname"}})
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 0, "message": "Nickname updated.",
+			"code": 0, "message": t(ctx, "user.profile.nickname.success", "nickname", nickname),
 		})
 
 	case "password":
@@ -98,7 +98,7 @@ func (r *UserController) HandleProfile(ctx goravelhttp.Context) goravelhttp.Resp
 		}
 		if !php.VerifyPassword(user.Password, current) {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 1, "message": "Wrong password.",
+				"code": 1, "message": t(ctx, "user.profile.password.wrong-password"),
 			})
 		}
 		hashed, err := php.HashPassword(newPassword, 0)
@@ -112,7 +112,7 @@ func (r *UserController) HandleProfile(ctx goravelhttp.Context) goravelhttp.Resp
 			Payload: map[string]any{"uid": user.UID, "action": "password"}})
 		_ = auth.Logout(ctx)
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 0, "message": "Password updated, please login again.",
+			"code": 0, "message": t(ctx, "user.profile.password.success"),
 		})
 
 	case "email":
@@ -125,12 +125,12 @@ func (r *UserController) HandleProfile(ctx goravelhttp.Context) goravelhttp.Resp
 		}
 		if count, _ := users.CountByEmail(email); count > 0 {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 1, "message": "This email has already been taken.",
+				"code": 1, "message": t(ctx, "user.profile.email.existed"),
 			})
 		}
 		if !php.VerifyPassword(user.Password, password) {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 1, "message": "Wrong password.",
+				"code": 1, "message": t(ctx, "user.profile.email.wrong-password"),
 			})
 		}
 		if err := users.UpdateEmail(user.UID, email); err != nil {
@@ -140,19 +140,19 @@ func (r *UserController) HandleProfile(ctx goravelhttp.Context) goravelhttp.Resp
 			Payload: map[string]any{"uid": user.UID, "action": "email"}})
 		_ = auth.Logout(ctx)
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 0, "message": "Email updated, please login again.",
+			"code": 0, "message": t(ctx, "user.profile.email.success"),
 		})
 
 	case "delete":
 		password := ctx.Request().Input("password")
 		if user.IsAdmin() {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 1, "message": "Administrators cannot delete their accounts.",
+				"code": 1, "message": t(ctx, "user.profile.delete.admin"),
 			})
 		}
 		if !php.VerifyPassword(user.Password, password) {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 1, "message": "Wrong password.",
+				"code": 1, "message": t(ctx, "user.profile.delete.wrong-password"),
 			})
 		}
 		if err := users.Delete(user.UID); err != nil {
@@ -160,12 +160,12 @@ func (r *UserController) HandleProfile(ctx goravelhttp.Context) goravelhttp.Resp
 		}
 		_ = auth.Logout(ctx)
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 0, "message": "Your account has been deleted.",
+			"code": 0, "message": t(ctx, "user.profile.delete.success"),
 		})
 	}
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 1, "message": "Illegal parameters.",
+		"code": 1, "message": t(ctx, "general.illegal-parameters"),
 	})
 }
 
@@ -200,17 +200,17 @@ func (r *UserController) SetAvatar(ctx goravelhttp.Context) goravelhttp.Response
 		}
 		if texture == nil {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 1, "message": "Texture not found.",
+				"code": 1, "message": t(ctx, "skinlib.non-existent"),
 			})
 		}
 		if texture.Type == "cape" {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 1, "message": "You can only use a skin as avatar.",
+				"code": 1, "message": t(ctx, "user.profile.avatar.wrong-type"),
 			})
 		}
 		if !texture.Public && texture.Uploader != user.UID && !user.IsAdmin() {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 1, "message": "This texture is private.",
+				"code": 1, "message": t(ctx, "skinlib.show.private"),
 			})
 		}
 	}
@@ -220,7 +220,7 @@ func (r *UserController) SetAvatar(ctx goravelhttp.Context) goravelhttp.Response
 	}
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Avatar updated.",
+		"code": 0, "message": t(ctx, "user.profile.avatar.success"),
 	})
 }
 
@@ -317,7 +317,7 @@ func (r *UserController) Sign(ctx goravelhttp.Context) goravelhttp.Response {
 	}
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": fmt.Sprintf("Signed in and got %d points.", acquired),
+		"code": 0, "message": t(ctx, "user.sign-success", "score", fmt.Sprint(acquired)),
 		"data": goravelhttp.Json{"score": score},
 	})
 }

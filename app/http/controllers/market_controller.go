@@ -40,7 +40,7 @@ func (r *MarketController) List(ctx goravelhttp.Context) goravelhttp.Response {
 	packages, err := plugin.FetchRegistry(registry, "zh_CN")
 	if err != nil {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "Market connection error: " + err.Error(),
+			"code": 1, "message": t(ctx, "admin.plugins.market.connection-error", "error", err.Error()),
 		})
 	}
 
@@ -80,7 +80,7 @@ func (r *MarketController) Download(ctx goravelhttp.Context) goravelhttp.Respons
 	packages, err := plugin.FetchRegistry(registry, "zh_CN")
 	if err != nil {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "Market connection error: " + err.Error(),
+			"code": 1, "message": t(ctx, "admin.plugins.market.connection-error", "error", err.Error()),
 		})
 	}
 	var target *plugin.MarketPackage
@@ -92,7 +92,7 @@ func (r *MarketController) Download(ctx goravelhttp.Context) goravelhttp.Respons
 	}
 	if target == nil {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "Plugin not found in market.",
+			"code": 1, "message": t(ctx, "admin.plugins.market.non-existent", "plugin", name),
 		})
 	}
 	if err := manager.DownloadPackage(target.Dist.URL); err != nil {
@@ -101,6 +101,6 @@ func (r *MarketController) Download(ctx goravelhttp.Context) goravelhttp.Respons
 		})
 	}
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Plugin installed.",
+		"code": 0, "message": t(ctx, "admin.plugins.market.install-success"),
 	})
 }

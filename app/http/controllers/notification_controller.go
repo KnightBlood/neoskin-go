@@ -195,7 +195,7 @@ func (r *NotificationController) Send(ctx goravelhttp.Context) goravelhttp.Respo
 		_ = notifications.Insert(notifiable, payload, now)
 	}
 
-	ctx.Request().Session().Flash("sentResult", "Notification sent.")
+	ctx.Request().Session().Flash("sentResult", t(ctx, "admin.notifications.send.success"))
 	ctx.Response().Header("Location", "/admin")
 	return ctx.Response().String(nethttp.StatusFound, "")
 }

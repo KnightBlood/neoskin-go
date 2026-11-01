@@ -87,7 +87,7 @@ func (r *PlayerController) Add(ctx goravelhttp.Context) goravelhttp.Response {
 	}
 	if existing, _ := players.FindDetailByName(name); existing != nil {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "This player name is already taken.",
+			"code": 1, "message": t(ctx, "user.player.add.repeated"),
 		})
 	}
 
@@ -111,7 +111,7 @@ func (r *PlayerController) Add(ctx goravelhttp.Context) goravelhttp.Response {
 	player, _ := players.FindByID(pid)
 	plugin.DefaultDispatcher.Dispatch(plugin.Event{Name: plugin.EventPlayerWasAdded, Payload: pid})
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Player added.", "data": toPlayerJSON(*player),
+		"code": 0, "message": t(ctx, "user.player.add.success", "name", name), "data": toPlayerJSON(*player),
 	})
 }
 
@@ -136,7 +136,7 @@ func (r *PlayerController) Delete(ctx goravelhttp.Context) goravelhttp.Response 
 	plugin.DefaultDispatcher.Dispatch(plugin.Event{Name: plugin.EventPlayerWasDeleted, Payload: player.PID})
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Player deleted.",
+		"code": 0, "message": t(ctx, "user.player.delete.success", "name", player.Name),
 	})
 }
 
@@ -155,7 +155,7 @@ func (r *PlayerController) Rename(ctx goravelhttp.Context) goravelhttp.Response 
 	}
 	if existing, _ := players.FindDetailByName(name); existing != nil && existing.PID != player.PID {
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-			"code": 1, "message": "This player name is already taken.",
+			"code": 1, "message": t(ctx, "user.player.rename.repeated"),
 		})
 	}
 
@@ -166,7 +166,7 @@ func (r *PlayerController) Rename(ctx goravelhttp.Context) goravelhttp.Response 
 	plugin.DefaultDispatcher.Dispatch(plugin.Event{Name: plugin.EventPlayerProfileUpdated,
 		Payload: map[string]any{"pid": player.PID, "action": "rename"}})
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Player renamed.", "data": toPlayerJSON(*updated),
+		"code": 0, "message": t(ctx, "user.player.rename.success", "old", player.Name, "new", name), "data": toPlayerJSON(*updated),
 	})
 }
 
@@ -193,7 +193,7 @@ func (r *PlayerController) SetTextures(ctx goravelhttp.Context) goravelhttp.Resp
 		}
 		if texture == nil {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 1, "message": "Texture not found.",
+				"code": 1, "message": t(ctx, "skinlib.non-existent"),
 			})
 		}
 		ok, err := closet.InCloset(user.UID, tid)
@@ -202,7 +202,7 @@ func (r *PlayerController) SetTextures(ctx goravelhttp.Context) goravelhttp.Resp
 		}
 		if !ok {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-				"code": 1, "message": "Texture is not in your closet.",
+				"code": 1, "message": t(ctx, "user.closet.remove.non-existent"),
 			})
 		}
 		if kind == "skin" {
@@ -219,7 +219,7 @@ func (r *PlayerController) SetTextures(ctx goravelhttp.Context) goravelhttp.Resp
 	plugin.DefaultDispatcher.Dispatch(plugin.Event{Name: plugin.EventPlayerProfileUpdated,
 		Payload: map[string]any{"pid": player.PID, "action": "textures"}})
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Texture applied.", "data": toPlayerJSON(*updated),
+		"code": 0, "message": t(ctx, "user.player.set.success", "name", player.Name), "data": toPlayerJSON(*updated),
 	})
 }
 
@@ -256,7 +256,7 @@ func (r *PlayerController) ClearTextures(ctx goravelhttp.Context) goravelhttp.Re
 		Payload: map[string]any{"pid": player.PID, "action": "clear_textures"}})
 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"code": 0, "message": "Texture cleared.",
+		"code": 0, "message": t(ctx, "user.player.clear.success", "name", player.Name),
 	})
 }
 
@@ -281,7 +281,7 @@ func (r *PlayerController) owned(ctx goravelhttp.Context) (*model.Player, *model
 	}
 	if player.UID != user.UID {
 		return nil, nil, nil, nil, ctx.Response().Json(nethttp.StatusForbidden,
-			goravelhttp.Json{"code": 1, "message": "No permission."})
+			goravelhttp.Json{"code": 1, "message": t(ctx, "skinlib.no-permission")})
 	}
 
 	return player, user, conn, dialect, nil
