@@ -1,0 +1,6 @@
+{{define "auth_reset"}}{{template "auth-open" .}}
+        <p class="login-box-msg">
+          {{t "auth.reset.message" "username" .Nickname}}
+        </p>
+        <main></main>
+{{template "auth-close" .}}{{end}}

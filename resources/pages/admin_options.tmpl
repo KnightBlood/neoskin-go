@@ -1,0 +1,157 @@
+{{define "admin_options"}}{{template "admin-open" .}}
+          <div class="row">
+            <div class="col-md-6">
+              <form class="card card-primary" method="post" action="/admin/options">
+                <input type="hidden" name="_token" value="{{.CSRF}}">
+                <input type="hidden" name="option" value="general">
+                <div class="card-header"><h3 class="card-title">{{t "options.general.title"}}</h3></div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <label>{{t "options.general.site_name"}}</label>
+                    <input class="form-control" name="site_name" value="{{index .Options "site_name"}}">
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.general.site_description.title"}}</label>
+                    <input class="form-control" name="site_description" value="{{index .Options "site_description"}}">
+                    <p class="description">{{t "options.general.site_description.description"}}</p>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.general.site_url.title"}}</label>
+                    <input class="form-control" name="site_url" value="{{index .Options "site_url"}}">
+                    <p class="description">{{t "options.general.site_url.hint"}}</p>
+                  </div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="register_with_player_name" id="register_with_player_name" value="true" {{if eq (index .Options "register_with_player_name") "true"}}checked{{end}}>
+                    <label class="form-check-label" for="register_with_player_name">{{t "options.general.register_with_player_name.label"}}</label>
+                  </div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="require_verification" id="require_verification" value="true" {{if eq (index .Options "require_verification") "true"}}checked{{end}}>
+                    <label class="form-check-label" for="require_verification">{{t "options.general.require_verification.label"}}</label>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.general.regs_per_ip"}}</label>
+                    <input class="form-control" name="regs_per_ip" value="{{index .Options "regs_per_ip"}}">
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.general.max_upload_file_size.title"}}</label>
+                    <div class="input-group">
+                      <input class="form-control" name="max_upload_file_size" value="{{index .Options "max_upload_file_size"}}">
+                      <div class="input-group-append"><span class="input-group-text">KB</span></div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.general.max_texture_width.title"}}</label>
+                    <div class="input-group">
+                      <input class="form-control" name="max_texture_width" value="{{index .Options "max_texture_width"}}">
+                      <div class="input-group-append"><span class="input-group-text">px</span></div>
+                    </div>
+                    <p class="description">{{t "options.general.max_texture_width.hint"}}</p>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.general.player_name_rule.title"}}</label>
+                    <select class="form-control" name="player_name_rule">
+                      <option value="official" {{if eq (index .Options "player_name_rule") "official"}}selected{{end}}>{{t "options.general.player_name_rule.official"}}</option>
+                      <option value="cjk" {{if eq (index .Options "player_name_rule") "cjk"}}selected{{end}}>{{t "options.general.player_name_rule.cjk"}}</option>
+                      <option value="utf8" {{if eq (index .Options "player_name_rule") "utf8"}}selected{{end}}>{{t "options.general.player_name_rule.utf8"}}</option>
+                      <option value="custom" {{if eq (index .Options "player_name_rule") "custom"}}selected{{end}}>{{t "options.general.player_name_rule.custom"}}</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.general.custom_player_name_regexp.title"}}</label>
+                    <input class="form-control" name="custom_player_name_regexp" value="{{index .Options "custom_player_name_regexp"}}" placeholder="{{t "options.general.custom_player_name_regexp.placeholder"}}">
+                    <p class="description">{{t "options.general.custom_player_name_regexp.hint"}}</p>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.general.player_name_length.title"}}</label>
+                    <div class="input-group">
+                      <input class="form-control" name="player_name_length_min" value="{{index .Options "player_name_length_min"}}">
+                      <div class="input-group-append"><span class="input-group-text">~</span></div>
+                      <input class="form-control" name="player_name_length_max" value="{{index .Options "player_name_length_max"}}">
+                      <div class="input-group-append"><span class="input-group-text">{{t "options.general.player_name_length.suffix"}}</span></div>
+                    </div>
+                  </div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="auto_del_invalid_texture" id="auto_del_invalid_texture" value="true" {{if eq (index .Options "auto_del_invalid_texture") "true"}}checked{{end}}>
+                    <label class="form-check-label" for="auto_del_invalid_texture">{{t "options.general.auto_del_invalid_texture.label"}}</label>
+                  </div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="allow_downloading_texture" id="allow_downloading_texture" value="true" {{if eq (index .Options "allow_downloading_texture") "true"}}checked{{end}}>
+                    <label class="form-check-label" for="allow_downloading_texture">{{t "options.general.allow_downloading_texture.label"}}</label>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.general.status_code_for_private.title"}}</label>
+                    <select class="form-control" name="status_code_for_private">
+                      <option value="403" {{if eq (index .Options "status_code_for_private") "403"}}selected{{end}}>403 Forbidden</option>
+                      <option value="404" {{if eq (index .Options "status_code_for_private") "404"}}selected{{end}}>404 Not Found</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.general.texture_name_regexp.title"}}</label>
+                    <input class="form-control" name="texture_name_regexp" value="{{index .Options "texture_name_regexp"}}" placeholder="{{t "options.general.texture_name_regexp.placeholder"}}">
+                    <p class="description">{{t "options.general.texture_name_regexp.hint"}}</p>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.general.content_policy.title"}}</label>
+                    <textarea class="form-control" rows="3" name="content_policy">{{index .Options "content_policy"}}</textarea>
+                  </div>
+                </div>
+                <div class="card-footer"><button class="btn btn-primary" type="submit">{{t "general.submit"}}</button></div>
+              </form>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card card-outline card-info">
+                <div class="card-body"><a href="/admin/communications">前往通知与公告</a></div>
+              </div>
+
+              <form class="card card-primary" method="post" action="/admin/options">
+                <input type="hidden" name="_token" value="{{.CSRF}}">
+                <input type="hidden" name="option" value="meta">
+                <div class="card-header"><h3 class="card-title">{{t "options.meta.title"}}</h3></div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <label>{{t "options.meta.meta_keywords.title"}}</label>
+                    <input class="form-control" name="meta_keywords" value="{{index .Options "meta_keywords"}}">
+                    <p class="description">{{t "options.meta.meta_keywords.hint"}}</p>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.meta.meta_description.title"}}</label>
+                    <input class="form-control" name="meta_description" value="{{index .Options "meta_description"}}">
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.meta.meta_extras.title"}}</label>
+                    <textarea class="form-control" rows="6" name="meta_extras">{{index .Options "meta_extras"}}</textarea>
+                  </div>
+                </div>
+                <div class="card-footer"><button class="btn btn-primary" type="submit">{{t "general.submit"}}</button></div>
+              </form>
+
+              <form class="card card-primary" method="post" action="/admin/options">
+                <input type="hidden" name="_token" value="{{.CSRF}}">
+                <input type="hidden" name="option" value="recaptcha">
+                <div class="card-header"><h3 class="card-title">reCAPTCHA</h3></div>
+                <div class="card-body">
+                  <div class="form-group"><label>sitekey</label><input class="form-control" name="recaptcha_sitekey" value="{{index .Options "recaptcha_sitekey"}}"></div>
+                  <div class="form-group"><label>secretkey</label><input class="form-control" name="recaptcha_secretkey" value="{{index .Options "recaptcha_secretkey"}}"></div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="recaptcha_invisible" id="recaptcha_invisible" value="true" {{if eq (index .Options "recaptcha_invisible") "true"}}checked{{end}}>
+                    <label class="form-check-label" for="recaptcha_invisible">{{t "options.recaptcha.recaptcha_invisible.label"}}</label>
+                  </div>
+                </div>
+                <div class="card-footer"><button class="btn btn-primary" type="submit">{{t "general.submit"}}</button></div>
+              </form>
+
+              <form class="card card-danger" method="post" action="/admin/options">
+                <input type="hidden" name="_token" value="{{.CSRF}}">
+                <input type="hidden" name="option" value="updates">
+                <div class="card-header"><h3 class="card-title">更新与插件仓库</h3></div>
+                <div class="card-body">
+                  <p class="text-danger font-weight-bold">请注意，修改更新 URL 可能导致您的 Blessing Skin 被恶意代码注入，进而影响您的数据、服务器或内网资产安全。<br>我们无法 100% 保证第三方更新源的安全，修改这里之前<strong>请一定要知道你在做什么！</strong></p>
+                  <div class="form-group"><label>主站更新检测 URL</label><input class="form-control" name="update_source" value="{{index .Options "update_source"}}"></div>
+                  <div class="form-group"><label>插件仓库 URL</label><input class="form-control" name="plugin_market_source" value="{{index .Options "plugin_market_source"}}"></div>
+                </div>
+                <div class="card-footer"><button class="btn btn-primary" type="submit">{{t "general.submit"}}</button></div>
+              </form>
+            </div>
+          </div>
+{{template "admin-close" .}}{{end}}

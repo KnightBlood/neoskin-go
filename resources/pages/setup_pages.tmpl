@@ -1,0 +1,58 @@
+{{define "setup_welcome"}}{{template "setup-open" .}}
+    <p>{{t "setup.wizard.welcome.text" "version" .Version}}</p>
+    <a class="btn btn-primary" href="/setup/database">{{t "setup.wizard.welcome.button"}}</a>
+{{template "setup-close" .}}{{end}}
+
+{{define "setup_database"}}{{template "setup-open" .}}
+    <p>{{t "setup.wizard.database.text"}}</p>
+    <form id="setup" method="post" action="/setup/database">
+      <input type="hidden" name="_token" value="{{.CSRF}}">
+      <div class="form-group">
+        <label class="form-label">{{t "setup.wizard.database.type"}}</label>
+        <label class="form-radio"><input type="radio" name="type" value="mysql" {{if or (eq (index .Values "DB_CONNECTION") "mysql") (eq (index .Values "DB_CONNECTION") "")}}checked{{end}}> MySQL / MariaDB</label>
+        <label class="form-radio"><input type="radio" name="type" value="pgsql" {{if eq (index .Values "DB_CONNECTION") "pgsql"}}checked{{end}}> PostgreSQL</label>
+        <label class="form-radio"><input type="radio" name="type" value="sqlite" {{if eq (index .Values "DB_CONNECTION") "sqlite"}}checked{{end}}> SQLite</label>
+      </div>
+      <div class="form-group"><label class="form-label" for="host">{{t "setup.wizard.database.host"}}</label>
+        <input id="host" class="form-input" name="host" value="{{index .Values "DB_HOST"}}"></div>
+      <div class="form-group"><label class="form-label" for="port">{{t "setup.wizard.database.port"}}</label>
+        <input id="port" class="form-input" name="port" value="{{index .Values "DB_PORT"}}"></div>
+      <div class="form-group"><label class="form-label" for="username">{{t "setup.wizard.database.username"}}</label>
+        <input id="username" class="form-input" name="username" value="{{index .Values "DB_USERNAME"}}"></div>
+      <div class="form-group"><label class="form-label" for="password">{{t "setup.wizard.database.password"}}</label>
+        <input id="password" class="form-input" type="password" name="password" value="{{index .Values "DB_PASSWORD"}}"></div>
+      <div class="form-group"><label class="form-label" for="db">{{t "setup.wizard.database.db"}}</label>
+        <input id="db" class="form-input" name="db" value="{{index .Values "DB_DATABASE"}}">
+        <p class="form-input-hint">{{t "setup.wizard.database.db-notice"}}</p></div>
+      <div class="form-group"><label class="form-label" for="prefix">{{t "setup.wizard.database.prefix"}}</label>
+        <input id="prefix" class="form-input" name="prefix" value="{{index .Values "DB_PREFIX"}}">
+        <p class="form-input-hint">{{t "setup.wizard.database.prefix-notice"}}</p></div>
+      <button class="btn btn-primary" type="submit">{{t "setup.wizard.welcome.button"}}</button>
+    </form>
+{{template "setup-close" .}}{{end}}
+
+{{define "setup_info"}}{{template "setup-open" .}}
+    <p>{{t "setup.wizard.info.text"}}</p>
+    <form method="post" action="/setup/finish">
+      <input type="hidden" name="_token" value="{{.CSRF}}">
+      <div class="form-group"><label class="form-label" for="email">{{t "setup.wizard.info.admin-email"}}</label>
+        <input id="email" type="email" class="form-input" name="email" required>
+        <p class="form-input-hint">{{t "setup.wizard.info.admin-notice"}}</p></div>
+      <div class="form-group"><label class="form-label" for="nickname">{{t "setup.wizard.info.nickname"}}</label>
+        <input id="nickname" class="form-input" name="nickname" required></div>
+      <div class="form-group"><label class="form-label" for="password">{{t "setup.wizard.info.password"}}</label>
+        <input id="password" type="password" class="form-input" name="password" required minlength="8" maxlength="32">
+        <p class="form-input-hint">{{t "setup.wizard.info.pwd-notice"}}</p></div>
+      <div class="form-group"><label class="form-label" for="confirm">{{t "setup.wizard.info.confirm-pwd"}}</label>
+        <input id="confirm" type="password" class="form-input" name="password_confirmation" required></div>
+      <div class="form-group"><label class="form-label" for="site-name">{{t "setup.wizard.info.site-name"}}</label>
+        <input id="site-name" class="form-input" name="site_name" required>
+        <p class="form-input-hint">{{t "setup.wizard.info.site-name-notice"}}</p></div>
+      <button class="btn btn-primary" type="submit">{{t "setup.wizard.info.button"}}</button>
+    </form>
+{{template "setup-close" .}}{{end}}
+
+{{define "setup_finish"}}{{template "setup-open" .}}
+    <p>{{t "setup.wizard.finish.text"}}</p>
+    <a class="btn btn-primary" href="/">{{t "setup.locked.button"}}</a>
+{{template "setup-close" .}}{{end}}

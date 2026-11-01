@@ -1,0 +1,128 @@
+{{define "admin_score"}}{{template "admin-open" .}}
+          <div class="row">
+            <div class="col-md-6">
+              <form class="card card-primary" method="post" action="/admin/score">
+                <input type="hidden" name="_token" value="{{.CSRF}}">
+                <input type="hidden" name="option" value="rate">
+                <div class="card-header"><h3 class="card-title">{{t "options.rate.title"}}</h3></div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <label>{{t "options.rate.score_per_storage.title"}}</label>
+                    <div class="input-group">
+                      <input class="form-control" name="score_per_storage" value="{{index .Options "score_per_storage"}}">
+                      <div class="input-group-append"><span class="input-group-text">{{t "options.rate.score_per_storage.addon"}}</span></div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.rate.private_score_per_storage.title"}}</label>
+                    <div class="input-group">
+                      <input class="form-control" name="private_score_per_storage" value="{{index .Options "private_score_per_storage"}}">
+                      <div class="input-group-append"><span class="input-group-text">{{t "options.rate.private_score_per_storage.addon"}}</span></div>
+                    </div>
+                    <p class="description">{{t "options.rate.private_score_per_storage.hint"}}</p>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.rate.score_per_closet_item.title"}}</label>
+                    <div class="input-group">
+                      <input class="form-control" name="score_per_closet_item" value="{{index .Options "score_per_closet_item"}}">
+                      <div class="input-group-append"><span class="input-group-text">{{t "options.rate.score_per_closet_item.addon"}}</span></div>
+                    </div>
+                  </div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="return_score" id="return_score" value="true" {{if eq (index .Options "return_score") "true"}}checked{{end}}>
+                    <label class="form-check-label" for="return_score">{{t "options.rate.return_score.label"}}</label>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.rate.score_per_player.title"}}</label>
+                    <div class="input-group">
+                      <input class="form-control" name="score_per_player" value="{{index .Options "score_per_player"}}">
+                      <div class="input-group-append"><span class="input-group-text">{{t "options.rate.score_per_player.addon"}}</span></div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.rate.user_initial_score"}}</label>
+                    <input class="form-control" name="user_initial_score" value="{{index .Options "user_initial_score"}}">
+                  </div>
+                </div>
+                <div class="card-footer"><button class="btn btn-primary" type="submit">{{t "general.submit"}}</button></div>
+              </form>
+
+              <form class="card card-primary" method="post" action="/admin/score">
+                <input type="hidden" name="_token" value="{{.CSRF}}">
+                <input type="hidden" name="option" value="report">
+                <div class="card-header"><h3 class="card-title">{{t "options.report.title"}}</h3></div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <label>{{t "options.report.reporter_score_modification.title"}}</label>
+                    <input class="form-control" name="reporter_score_modification" value="{{index .Options "reporter_score_modification"}}">
+                    <p class="description">{{t "options.report.reporter_score_modification.description"}}</p>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.report.reporter_reward_score.title"}}</label>
+                    <input class="form-control" name="reporter_reward_score" value="{{index .Options "reporter_reward_score"}}">
+                  </div>
+                </div>
+                <div class="card-footer"><button class="btn btn-primary" type="submit">{{t "general.submit"}}</button></div>
+              </form>
+            </div>
+
+            <div class="col-md-6">
+              <form class="card card-primary" method="post" action="/admin/score">
+                <input type="hidden" name="_token" value="{{.CSRF}}">
+                <input type="hidden" name="option" value="sign">
+                <div class="card-header"><h3 class="card-title">{{t "options.sign.title"}}</h3></div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <label>{{t "options.sign.sign_score.title"}}</label>
+                    <div class="input-group">
+                      <input class="form-control" name="sign_score_from" value="{{index .Options "sign_score_from"}}">
+                      <div class="input-group-append"><span class="input-group-text">{{t "options.sign.sign_score.addon1"}}</span></div>
+                      <input class="form-control" name="sign_score_to" value="{{index .Options "sign_score_to"}}">
+                      <div class="input-group-append"><span class="input-group-text">{{t "options.sign.sign_score.addon2"}}</span></div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.sign.sign_gap_time.title"}}</label>
+                    <div class="input-group">
+                      <input class="form-control" name="sign_gap_time" value="{{index .Options "sign_gap_time"}}">
+                      <div class="input-group-append"><span class="input-group-text">{{t "options.sign.sign_gap_time.addon"}}</span></div>
+                    </div>
+                  </div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="sign_after_zero" id="sign_after_zero" value="true" {{if eq (index .Options "sign_after_zero") "true"}}checked{{end}}>
+                    <label class="form-check-label" for="sign_after_zero">{{t "options.sign.sign_after_zero.label"}}</label>
+                    <p class="description">{{t "options.sign.sign_after_zero.hint"}}</p>
+                  </div>
+                </div>
+                <div class="card-footer"><button class="btn btn-primary" type="submit">{{t "general.submit"}}</button></div>
+              </form>
+
+              <form class="card card-primary" method="post" action="/admin/score">
+                <input type="hidden" name="_token" value="{{.CSRF}}">
+                <input type="hidden" name="option" value="sharing">
+                <div class="card-header"><h3 class="card-title">{{t "options.sharing.title"}}</h3></div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <label>{{t "options.sharing.score_award_per_texture.title"}}</label>
+                    <div class="input-group">
+                      <input class="form-control" name="score_award_per_texture" value="{{index .Options "score_award_per_texture"}}">
+                      <div class="input-group-append"><span class="input-group-text">{{t "general.user.score"}}</span></div>
+                    </div>
+                  </div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="take_back_scores_after_deletion" id="take_back_scores_after_deletion" value="true" {{if eq (index .Options "take_back_scores_after_deletion") "true"}}checked{{end}}>
+                    <label class="form-check-label" for="take_back_scores_after_deletion">{{t "options.sharing.take_back_scores_after_deletion.label"}}</label>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.sharing.score_award_per_like.title"}}</label>
+                    <div class="input-group">
+                      <input class="form-control" name="score_award_per_like" value="{{index .Options "score_award_per_like"}}">
+                      <div class="input-group-append"><span class="input-group-text">{{t "general.user.score"}}</span></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-footer"><button class="btn btn-primary" type="submit">{{t "general.submit"}}</button></div>
+              </form>
+            </div>
+          </div>
+{{template "admin-close" .}}{{end}}

@@ -1,0 +1,12 @@
+{{define "user_player"}}{{template "user-open" .}}
+          <div id="players-list"></div>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">{{t "general.notice"}}</h3>
+            </div>
+            <div class="card-body">
+              {{t "user.player.login-notice"}}
+            </div>
+          </div>
+          <script id="blessing-extra" type="application/json">{{.ExtraJSON}}</script>
+{{template "user-close" .}}{{end}}

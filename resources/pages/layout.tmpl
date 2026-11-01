@@ -1,0 +1,120 @@
+{{define "head"}}
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="csrf-token" content="{{.CSRF}}">
+<meta name="theme-color" content="{{.ThemeColor}}">
+<meta name="keywords" content="{{.Keywords}}">
+<meta name="description" content="{{.Description}}">
+{{.MetaExtra}}
+<script>window.blessing = {{.BlessingJSON}}</script>
+<link href="{{.StyleCSS}}" rel="stylesheet" crossorigin="anonymous">
+<link href="{{.SpectreCSS}}" rel="stylesheet" crossorigin="anonymous">
+<link rel="shortcut icon" href="{{.Favicon}}">
+<link rel="icon" type="image/png" href="{{.Favicon}}" sizes="192x192">
+<link rel="apple-touch-icon" href="{{.Favicon}}" sizes="180x180">
+{{range .PluginStyles}}<link href="{{.}}" rel="stylesheet" crossorigin="anonymous">{{end}}
+{{if .CustomCSS}}<style>{{.CustomCSS}}</style>{{end}}
+{{.ExtraHead}}
+
+{{end}}
+
+{{define "foot"}}
+<script src="{{.I18nURL}}" crossorigin="anonymous"></script>
+<script src="{{.AppJS}}" crossorigin="anonymous"></script>
+{{range .PluginScripts}}<script src="{{.}}" crossorigin="anonymous"></script>{{end}}
+{{if .CustomJS}}<script>{{.CustomJS}}</script>{{end}}
+{{.ExtraFoot}}
+
+{{end}}
+
+{{define "languages"}}
+<li class="nav-item dropdown">
+  <a class="nav-link" data-toggle="dropdown" href="#">
+    <i class="fas fa-language" aria-hidden="true"></i>
+    <span class="d-none d-sm-inline">{{.CurrentLanguage}}</span>
+  </a>
+  <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+    {{range .Languages}}
+      <a href="{{.URL}}" class="dropdown-item locale">{{.Name}}</a>
+      <div class="dropdown-divider"></div>
+    {{end}}
+  </div>
+</li>
+{{end}}
+
+{{define "user-menu"}}
+<li class="nav-item dropdown user-menu">
+  <a href="#" class="nav-link d-flex align-items-center" data-toggle="dropdown">
+    <picture>
+      <source srcset="{{.AvatarURL}}" type="image/webp">
+      <img src="{{.AvatarPNGURL}}" class="bs-avatar mr-2" alt="User Image">
+    </picture>
+    <span class="d-none d-md-inline d-sm-block" data-mark="nickname">{{.Nickname}}</span>
+  </a>
+
+  <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+    <a class="dropdown-item" href="/user">{{t "general.user-center"}}</a>
+    <a class="dropdown-item" href="/user/profile">{{t "general.profile"}}</a>
+    {{if .IsAdmin}}
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item" href="/admin">{{t "general.admin-panel"}}</a>
+      <a class="dropdown-item" href="/admin/users">{{t "general.user-manage"}}</a>
+      <a class="dropdown-item" href="/admin/reports">{{t "general.report-manage"}}</a>
+      <a class="dropdown-item" href="#launch-cli">Web CLI</a>
+    {{end}}
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item" href="#" id="logout-button">{{t "general.logout"}}</a>
+  </div>
+</li>
+{{end}}
+
+{{define "copyright"}}
+<!-- YOU CAN NOT MODIFY THE COPYRIGHT TEXT W/O PERMISSION -->
+<div id="copyright-text" class="float-right d-none d-sm-inline">
+  {{if eq .CopyrightPreference 0}}
+    Powered with ❤ by <a href="https://github.com/bs-community/blessing-skin-server" target="_blank">Blessing Skin Server</a>.
+  {{else if eq .CopyrightPreference 1}}
+    Powered by <a href="https://github.com/bs-community/blessing-skin-server" target="_blank">Blessing Skin Server</a>.
+  {{else if eq .CopyrightPreference 2}}
+    Proudly powered by <a href="https://github.com/bs-community/blessing-skin-server" target="_blank">Blessing Skin Server</a>.
+  {{else if eq .CopyrightPreference 3}}
+    由 <a href="https://github.com/bs-community/blessing-skin-server" target="_blank">Blessing Skin Server</a> 强力驱动。
+  {{else if eq .CopyrightPreference 4}}
+    采用 <a href="https://github.com/bs-community/blessing-skin-server" target="_blank">Blessing Skin Server</a> 搭建。
+  {{else if eq .CopyrightPreference 5}}
+    使用 <a href="https://github.com/bs-community/blessing-skin-server" target="_blank">Blessing Skin Server</a> 稳定运行。
+  {{else}}
+    自豪地采用 <a href="https://github.com/bs-community/blessing-skin-server" target="_blank">Blessing Skin Server</a>。
+  {{end}}
+</div>
+{{.CustomCopyright}}
+{{end}}
+
+{{define "auth-open"}}<!DOCTYPE html>
+<html lang="{{.Locale}}">
+  <head>
+    {{template "head" .}}
+    <title>{{.Title}} - {{.SiteName}}</title>
+  </head>
+
+  <body class="hold-transition login-page">
+    <div class="login-box">
+      <div class="login-logo">
+        <a href="/">{{.SiteName}}</a>
+      </div>
+
+      <div class="card">
+        <div class="card-body login-card-body">
+{{end}}
+
+{{define "auth-close"}}
+        </div>
+      </div>
+    </div>
+
+    <script id="blessing-extra" type="application/json">{{.ExtraJSON}}</script>
+    {{template "foot" .}}
+  </body>
+</html>
+{{end}}

@@ -1,0 +1,12 @@
+{{define "user_message"}}{{template "user-open" .}}
+          <div class="card card-outline card-info">
+            <div class="card-header">
+              <h2 class="card-title">{{.MessageTitle}}</h2>
+            </div>
+            <div class="card-body" style="overflow-wrap:anywhere">{{.MessageContent}}</div>
+            <div class="card-footer d-flex justify-content-between">
+              <span class="text-muted">{{.MessageTime}}</span>
+              <a href="/user/inbox">返回站内信</a>
+            </div>
+          </div>
+{{template "user-close" .}}{{end}}

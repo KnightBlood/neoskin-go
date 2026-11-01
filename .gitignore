@@ -1,0 +1,24 @@
+.idea
+.vscode
+.DS_Store
+.env
+.env.*
+!.env.example
+storage
+tmp
+vendor/
+node_modules/
+
+# Go build output
+/neoskin
+/neoskin.exe
+*.test
+*.out
+
+# SQLite / local data
+database/*.sqlite
+database/*.db
+database/*.sqlite-journal
+
+# 前端预编译产物（部署时从 PHP 源项目复制）
+public/app/

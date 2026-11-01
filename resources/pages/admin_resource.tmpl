@@ -1,0 +1,68 @@
+{{define "admin_resource"}}{{template "admin-open" .}}
+          <div class="row">
+            <div class="col-md-12">
+              <div class="callout callout-warning">{{t "options.res-warning"}}</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <form class="card card-primary" method="post" action="/admin/resource">
+                <input type="hidden" name="_token" value="{{.CSRF}}">
+                <input type="hidden" name="option" value="resources">
+                <div class="card-header">
+                  <h3 class="card-title">{{t "options.resources.title"}}</h3>
+                </div>
+                <div class="card-body">
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="force_ssl" id="force_ssl" value="true" {{if eq (index .Options "force_ssl") "true"}}checked{{end}}>
+                    <label class="form-check-label" for="force_ssl">{{t "options.resources.force_ssl.label"}}</label>
+                    <p class="description">{{t "options.resources.force_ssl.hint"}}</p>
+                  </div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="auto_detect_asset_url" id="auto_detect_asset_url" value="true" {{if eq (index .Options "auto_detect_asset_url") "true"}}checked{{end}}>
+                    <label class="form-check-label" for="auto_detect_asset_url">{{t "options.resources.auto_detect_asset_url.label"}}</label>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.resources.cache_expire_time.title"}}</label>
+                    <input class="form-control" name="cache_expire_time" value="{{index .Options "cache_expire_time"}}">
+                    <p class="description">{{t "options.resources.cache_expire_time.hint"}}</p>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.resources.cdn_address.title"}}</label>
+                    <input class="form-control" name="cdn_address" value="{{index .Options "cdn_address"}}">
+                    <p class="description">{{t "options.resources.cdn_address.hint"}}</p>
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <button class="btn btn-primary" type="submit">{{t "general.submit"}}</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="col-md-6">
+              <form class="card card-warning" method="post" action="/admin/resource">
+                <input type="hidden" name="_token" value="{{.CSRF}}">
+                <input type="hidden" name="option" value="cache">
+                <div class="card-header">
+                  <h3 class="card-title">{{t "options.cache.title"}}</h3>
+                </div>
+                <div class="card-body">
+                  <div class="callout callout-info">{{t "options.cache.driver" "driver" "file"}}</div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="enable_avatar_cache" id="enable_avatar_cache" value="true" {{if eq (index .Options "enable_avatar_cache") "true"}}checked{{end}}>
+                    <label class="form-check-label" for="enable_avatar_cache">{{t "options.cache.enable_avatar_cache.label"}}</label>
+                  </div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="enable_preview_cache" id="enable_preview_cache" value="true" {{if eq (index .Options "enable_preview_cache") "true"}}checked{{end}}>
+                    <label class="form-check-label" for="enable_preview_cache">{{t "options.cache.enable_preview_cache.label"}}</label>
+                  </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                  <button class="btn btn-primary" type="submit">{{t "general.submit"}}</button>
+                  <a class="btn btn-warning" href="/admin/resource?clear-cache=1">{{t "options.cache.clear"}}</a>
+                </div>
+              </form>
+            </div>
+          </div>
+{{template "admin-close" .}}{{end}}

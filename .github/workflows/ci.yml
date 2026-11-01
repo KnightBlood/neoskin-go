@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+      - run: go build ./...
+      - run: go vet ./...
+      - run: go test ./... -count=1
+
+  db-matrix:
+    runs-on: ubuntu-latest
+    needs: build-test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - db: mysql
+            image: mysql:8.0
+            port: 3306
+            username: root
+            password: root
+            health: "mysqladmin ping -h localhost -uroot -proot"
+          - db: mariadb
+            image: mariadb:11.4
+            port: 3306
+            username: root
+            password: root
+            health: "healthcheck.sh --connect --innodb_initialized"
+          - db: pgsql
+            image: postgres:16
+            port: 5432
+            username: postgres
+            password: root
+            health: "pg_isready -U postgres"
+          - db: sqlsrv
+            image: mcr.microsoft.com/mssql/server:2022-latest
+            port: 1433
+            username: sa
+            password: "YourStrong!Passw0rd"
+            health: "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P YourStrong!Passw0rd -Q 'SELECT 1'"
+    services:
+      database:
+        image: ${{ matrix.image }}
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: blessingskin
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: blessingskin
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: blessingskin
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
+        ports:
+          - ${{ matrix.port }}:${{ matrix.port }}
+        options: >-
+          --health-cmd "${{ matrix.health }}"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 30
+    env:
+      DB_CONNECTION: ${{ matrix.db }}
+      DB_HOST: 127.0.0.1
+      DB_PORT: ${{ matrix.port }}
+      DB_DATABASE: blessingskin
+      DB_USERNAME: ${{ matrix.username }}
+      DB_PASSWORD: ${{ matrix.password }}
+      DB_ENCRYPT: "false"
+      DB_TRUST_SERVER_CERTIFICATE: "true"
+      APP_KEY: "0123456789abcdef0123456789abcdef"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+      - run: go test ./internal/db -run TestMatrix -v -count=1
+      - run: go test ./internal/repo -run TestRepositoriesMatrix -v -count=1

@@ -1,0 +1,5 @@
+{{define "auth_forgot"}}{{template "auth-open" .}}
+        <p class="login-box-msg">{{t "auth.forgot.message"}}</p>
+        {{if .Error}}<div class="alert alert-warning">{{.Error}}</div>{{end}}
+        <main></main>
+{{template "auth-close" .}}{{end}}

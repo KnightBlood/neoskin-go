@@ -1,0 +1,7 @@
+{{define "auth_register"}}{{template "auth-open" .}}
+        <main></main>
+        <p class="login-box-msg">
+          {{t "auth.register.message" "sitename" .SiteName}}
+        </p>
+        {{if .Error}}<div class="alert alert-warning">{{.Error}}</div>{{end}}
+{{template "auth-close" .}}{{end}}

@@ -1,0 +1,32 @@
+{{define "user_inbox"}}{{template "user-open" .}}
+          <div class="card card-outline card-info">
+            <div class="card-header">
+              <h2 class="card-title">站内信</h2>
+            </div>
+            <div class="card-body">
+              <table class="table table-striped">
+                <thead>
+                  <tr><th>标题</th><th>状态</th><th>时间</th></tr>
+                </thead>
+                <tbody>
+                  {{range .Messages}}
+                    <tr>
+                      <td><a href="{{.URL}}">{{.Title}}</a></td>
+                      <td>{{.StatusText}}</td>
+                      <td>{{.Time}}</td>
+                    </tr>
+                  {{else}}
+                    <tr><td colspan="3">暂无站内信。</td></tr>
+                  {{end}}
+                </tbody>
+              </table>
+              <div class="d-flex justify-content-between">
+                <span>共 {{.Pagination.Total}} 条</span>
+                <div>
+                  {{if .Pagination.PrevURL}}<a class="btn btn-light" href="{{.Pagination.PrevURL}}">上一页</a>{{end}}
+                  {{if .Pagination.NextURL}}<a class="btn btn-light" href="{{.Pagination.NextURL}}">下一页</a>{{end}}
+                </div>
+              </div>
+            </div>
+          </div>
+{{template "user-close" .}}{{end}}

@@ -1,0 +1,22 @@
+{{define "skinlib_upload"}}{{template "skinlib-open" .}}
+      <div class="content-wrapper">
+        <div class="container">
+          <div class="content-header">
+            <div class="container-fluid">
+              <div class="d-flex justify-content-between flex-wrap">
+                <div><h1 class="m-0">{{t "skinlib.upload.title"}}</h1></div>
+                <div><div class="breadcrumb"></div></div>
+              </div>
+            </div>
+          </div>
+          <section class="content">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-md-6"><div id="file-input"></div></div>
+                <div class="col-md-6"><div id="previewer"></div></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+{{template "skinlib-close" .}}{{end}}

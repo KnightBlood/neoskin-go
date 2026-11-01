@@ -1,0 +1,40 @@
+{{define "user_reports"}}{{template "user-open" .}}
+          <div class="card">
+            <div class="card-body p-0">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>{{t "front-end.report.tid"}}</th>
+                    <th>{{t "front-end.report.reason"}}</th>
+                    <th>{{t "front-end.report.status-title"}}</th>
+                    <th>{{t "front-end.report.time"}}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{range .Reports}}
+                    <tr>
+                      <td>
+                        {{.TID}}&nbsp;
+                        <a href="/skinlib/show/{{.TID}}" target="_blank"><i class="fas fa-share"></i></a>
+                      </td>
+                      <td>{{.Reason}}</td>
+                      <td>{{.StatusText}}</td>
+                      <td>{{.Time}}</td>
+                    </tr>
+                  {{else}}
+                    <tr><td colspan="4">—</td></tr>
+                  {{end}}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {{if or .Pagination.PrevURL .Pagination.NextURL}}
+            <div class="d-flex justify-content-between">
+              <span>共 {{.Pagination.Total}} 条</span>
+              <div>
+                {{if .Pagination.PrevURL}}<a class="btn btn-light" href="{{.Pagination.PrevURL}}">上一页</a>{{end}}
+                {{if .Pagination.NextURL}}<a class="btn btn-light" href="{{.Pagination.NextURL}}">下一页</a>{{end}}
+              </div>
+            </div>
+          {{end}}
+{{template "user-close" .}}{{end}}

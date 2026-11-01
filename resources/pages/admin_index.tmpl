@@ -1,0 +1,53 @@
+{{define "admin_index"}}{{template "admin-open" .}}
+          <div class="row">
+            <div class="col-md-6">
+              <div class="small-box bg-info">
+                <div class="inner">
+                  <h3 class="stats">{{.StatsUsers}}</h3>
+                  <p>{{t "admin.index.total-users"}}</p>
+                </div>
+                <div class="icon"><i class="fas fa-users"></i></div>
+                <a href="/admin/users" class="small-box-footer">{{t "general.user-manage"}}&nbsp;<i class="fa fa-arrow-circle-right"></i></a>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="small-box bg-green">
+                <div class="inner">
+                  <h3 class="stats">{{.StatsPlayers}}</h3>
+                  <p>{{t "admin.index.total-players"}}</p>
+                </div>
+                <div class="icon"><i class="fas fa-gamepad"></i></div>
+                <a href="/admin/players" class="small-box-footer">{{t "general.player-manage"}}&nbsp;<i class="fa fa-arrow-circle-right"></i></a>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="small-box bg-purple">
+                <div class="inner">
+                  <h3 class="stats">{{.StatsTextures}}</h3>
+                  <p>{{t "admin.index.total-textures"}}</p>
+                </div>
+                <div class="icon"><i class="fas fa-file"></i></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="small-box bg-yellow">
+                <div class="inner">
+                  <h3 class="stats">{{.StatsStorage}}</h3>
+                  <p>{{t "admin.index.disk-usage"}}</p>
+                </div>
+                <div class="icon"><i class="fas fa-hdd"></i></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card card-primary">
+            <div class="card-header"><h3 class="card-title">{{t "admin.index.overview"}}</h3></div>
+            <div class="card-body">
+              <div class="chart" id="chart-users-registration"></div>
+              <div class="chart" id="chart-textures-upload"></div>
+            </div>
+          </div>
+{{template "admin-close" .}}{{end}}

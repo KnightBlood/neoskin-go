@@ -1,0 +1,27 @@
+{{define "auth_bind"}}{{template "auth-open" .}}
+        <p class="login-box-msg">{{t "auth.bind.message"}}</p>
+        <form method="post" id="login-form" action="/auth/bind">
+          <input type="hidden" name="_token" value="{{.CSRF}}">
+          <div class="input-group mb-3">
+            <input name="email" type="email" class="form-control" placeholder="{{t "auth.email"}}">
+            <div class="input-group-append">
+              <div class="input-group-text">
+                <span class="fas fa-envelope"></span>
+              </div>
+            </div>
+          </div>
+
+          <p>{{t "auth.bind.introduction"}}</p>
+
+          {{if .Error}}
+            <div class="alert alert-warning">
+              <i class="icon fas fa-exclamation-triangle"></i>
+              {{.Error}}
+            </div>
+          {{end}}
+
+          <button type="submit" class="btn btn-primary btn-block mt-3">
+            {{t "auth.bind.button"}}
+          </button>
+        </form>
+{{template "auth-close" .}}{{end}}

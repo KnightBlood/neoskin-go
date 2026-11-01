@@ -1,0 +1,122 @@
+{{define "admin_customize"}}{{template "admin-open" .}}
+          <div class="row">
+            <div class="col-md-3">
+              <form class="card box-primary" method="post" action="/admin/customize?action=color">
+                <input type="hidden" name="_token" value="{{.CSRF}}">
+                <input type="hidden" name="action" value="color">
+                <div class="card-header">
+                  <h3 class="card-title">{{t "admin.customize.change-color.title"}}</h3>
+                </div>
+                <div class="card-body">
+                  <div id="navbar-color-picker">
+                    <p>{{t "admin.customize.colors.navbar"}}</p>
+                    <div>
+                      {{range .NavbarColors}}
+                        <label>
+                          <input type="radio" class="d-none" name="navbar_color" value="{{.}}" {{if eq . $.Options.navbar_color}}checked{{end}}>
+                          <div class="btn-color bg-{{.}} display-inline-block rounded-pill mr-2 mb-1 elevation-2"></div>
+                        </label>
+                      {{end}}
+                    </div>
+                  </div>
+                  <div id="sidebar-dark-picker">
+                    <p>{{t "admin.customize.colors.sidebar.dark"}}</p>
+                    <div>
+                      {{range .SidebarColors}}
+                        <label>
+                          <input type="radio" class="d-none" name="sidebar_color" value="dark-{{.}}" {{if eq (printf "dark-%s" .) $.Options.sidebar_color}}checked{{end}}>
+                          <div class="btn-color bg-{{.}} display-inline-block rounded-pill mr-2 mb-1 elevation-2"></div>
+                        </label>
+                      {{end}}
+                    </div>
+                  </div>
+                  <div id="sidebar-light-picker">
+                    <p>{{t "admin.customize.colors.sidebar.light"}}</p>
+                    <div>
+                      {{range .SidebarColors}}
+                        <label>
+                          <input type="radio" class="d-none" name="sidebar_color" value="light-{{.}}" {{if eq (printf "light-%s" .) $.Options.sidebar_color}}checked{{end}}>
+                          <div class="btn-color bg-{{.}} display-inline-block rounded-pill mr-2 mb-1 elevation-2"></div>
+                        </label>
+                      {{end}}
+                    </div>
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <input type="submit" class="btn btn-primary" value="{{t "general.submit"}}" name="submit_color">
+                </div>
+              </form>
+            </div>
+
+            <div class="col-md-9">
+              <form class="card card-primary" method="post" action="/admin/customize">
+                <input type="hidden" name="_token" value="{{.CSRF}}">
+                <input type="hidden" name="option" value="homepage">
+                <div class="card-header"><h3 class="card-title">{{t "options.homepage.title"}}</h3></div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <label>{{t "options.homepage.home_pic_url.title"}}</label>
+                    <input class="form-control" name="home_pic_url" value="{{index .Options "home_pic_url"}}">
+                    <p class="description">{{t "options.homepage.home_pic_url.hint"}}</p>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.homepage.favicon_url.title"}}</label>
+                    <input class="form-control" name="favicon_url" value="{{index .Options "favicon_url"}}">
+                    <p class="description">{{t "options.homepage.favicon_url.hint"}}</p>
+                  </div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="transparent_navbar" id="transparent_navbar" value="true" {{if eq (index .Options "transparent_navbar") "true"}}checked{{end}}>
+                    <label class="form-check-label" for="transparent_navbar">{{t "options.homepage.transparent_navbar.label"}}</label>
+                  </div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="hide_intro" id="hide_intro" value="true" {{if eq (index .Options "hide_intro") "true"}}checked{{end}}>
+                    <label class="form-check-label" for="hide_intro">{{t "options.homepage.hide_intro.label"}}</label>
+                  </div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="fixed_bg" id="fixed_bg" value="true" {{if eq (index .Options "fixed_bg") "true"}}checked{{end}}>
+                    <label class="form-check-label" for="fixed_bg">{{t "options.homepage.fixed_bg.label"}}</label>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.homepage.copyright_prefer.title"}}</label>
+                    <select class="form-control" name="copyright_prefer">
+                      <option value="0" {{if eq (index .Options "copyright_prefer") "0"}}selected{{end}}>Powered with ❤ by Blessing Skin Server.</option>
+                      <option value="1" {{if eq (index .Options "copyright_prefer") "1"}}selected{{end}}>Powered by Blessing Skin Server.</option>
+                      <option value="2" {{if eq (index .Options "copyright_prefer") "2"}}selected{{end}}>Proudly powered by Blessing Skin Server.</option>
+                      <option value="3" {{if eq (index .Options "copyright_prefer") "3"}}selected{{end}}>由 Blessing Skin Server 强力驱动。</option>
+                      <option value="4" {{if eq (index .Options "copyright_prefer") "4"}}selected{{end}}>采用 Blessing Skin Server 搭建。</option>
+                      <option value="5" {{if eq (index .Options "copyright_prefer") "5"}}selected{{end}}>使用 Blessing Skin Server 稳定运行。</option>
+                      <option value="6" {{if eq (index .Options "copyright_prefer") "6"}}selected{{end}}>自豪地采用 Blessing Skin Server。</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "options.homepage.copyright_text.title"}}</label>
+                    <textarea class="form-control" rows="6" name="copyright_text">{{index .Options "copyright_text"}}</textarea>
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <button class="btn btn-primary" type="submit">{{t "general.submit"}}</button>
+                </div>
+              </form>
+
+              <form class="card card-primary" method="post" action="/admin/customize">
+                <input type="hidden" name="_token" value="{{.CSRF}}">
+                <input type="hidden" name="option" value="customJsCss">
+                <div class="card-header"><h3 class="card-title">{{t "options.customJsCss.title"}}</h3></div>
+                <div class="card-body">
+                  <p>{{t "options.customJsCss.message"}}</p>
+                  <div class="form-group">
+                    <label>CSS</label>
+                    <textarea class="form-control" rows="6" name="custom_css">{{index .Options "custom_css"}}</textarea>
+                  </div>
+                  <div class="form-group">
+                    <label>JavaScript</label>
+                    <textarea class="form-control" rows="6" name="custom_js">{{index .Options "custom_js"}}</textarea>
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <button class="btn btn-primary" type="submit">{{t "general.submit"}}</button>
+                </div>
+              </form>
+            </div>
+          </div>
+{{template "admin-close" .}}{{end}}

@@ -1,0 +1,43 @@
+{{define "admin_i18n"}}{{template "admin-open" .}}
+          <div class="row">
+            <div class="col-lg-8"><div class="card" id="table"></div></div>
+            <div class="col-lg-4">
+              <form action="/admin/i18n" method="post">
+                <div class="card card-primary">
+                  <div class="card-header">
+                    <h3 class="card-title">{{t "admin.i18n.add"}}</h3>
+                  </div>
+                  <div class="card-body p-0">
+                    {{if .Flash}}
+                      <div class="alert alert-success m-3">
+                        <i class="icon fas fa-check"></i>
+                        {{.Flash}}
+                      </div>
+                    {{end}}
+                    <input type="hidden" name="_token" value="{{.CSRF}}">
+                    <div class="container-fluid my-4 px-4">
+                      <div class="row mb-3">
+                        <div class="col-sm-3">{{t "admin.i18n.group"}}</div>
+                        <div class="col-sm-9"><input type="text" class="form-control" name="group" required></div>
+                      </div>
+                      <div class="row my-3">
+                        <div class="col-sm-3">{{t "admin.i18n.key"}}</div>
+                        <div class="col-sm-9"><input type="text" class="form-control" name="key" required></div>
+                      </div>
+                      <div class="row mt-3">
+                        <div class="col-sm-3">{{t "admin.i18n.text"}}</div>
+                        <div class="col-sm-9"><input type="text" class="form-control" name="text" required></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-footer">
+                    <input type="submit" value="{{t "general.submit"}}" class="btn btn-primary">
+                  </div>
+                </div>
+              </form>
+              <a class="btn btn-block btn-outline-info" href="https://blessing.netlify.com/ui-text.html" target="_blank">
+                {{t "admin.i18n.tip"}}
+              </a>
+            </div>
+          </div>
+{{template "admin-close" .}}{{end}}

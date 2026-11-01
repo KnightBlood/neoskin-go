@@ -1,0 +1,183 @@
+{{define "admin_communications"}}{{template "admin-open" .}}
+          {{if .CommunicationNote}}<div class="alert alert-success" role="status">{{.CommunicationNote}}</div>{{end}}
+          {{if .EditorOpen}}
+            <form id="communication-editor" method="post"
+                  action="{{if .EditingID}}/admin/communications/update/{{.EditingID}}{{else}}/admin/communications{{end}}"
+                  data-preview="/admin/communications/preview"
+                  data-import="/admin/communications/import">
+              {{if .EditingID}}<input type="hidden" name="_method" value="PUT">{{end}}
+              <input type="hidden" name="_token" value="{{.CSRF}}">
+              <script type="application/json" id="communication-initial">{{.EditorBlocksJSON}}</script>
+              <input type="hidden" name="blocks_json" id="communication-blocks">
+
+              <div class="card card-outline card-primary">
+                <div class="card-header">
+                  <h2 class="card-title">
+                    {{if eq .EditorKind "announcement"}}编辑站点公告{{else if .EditingID}}编辑站内信 #{{.EditingID}}{{else}}新建站内信{{end}}
+                  </h2>
+                  <div class="card-tools">
+                    <a class="btn btn-default" href="/admin/communications">返回列表</a>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="form-row">
+                    <div class="form-group col-md-5">
+                      <label for="communication-title">标题</label>
+                      <input id="communication-title" class="form-control" name="title" required maxlength="100" value="{{.EditorTitle}}">
+                    </div>
+                    <div class="form-group col-md-3">
+                      <label for="communication-kind">发布位置</label>
+                      <select id="communication-kind" name="kind" class="form-control">
+                        <option value="announcement" {{if eq .EditorKind "announcement"}}selected{{end}}>站点公告</option>
+                        <option value="message" {{if eq .EditorKind "message"}}selected{{end}}>站内信</option>
+                        <option value="both" {{if eq .EditorKind "both"}}selected{{end}}>公告与站内信</option>
+                      </select>
+                    </div>
+                    <div class="form-group col-md-4">
+                      <label for="communication-locale">公告语言</label>
+                      <input id="communication-locale" name="locale" class="form-control" value="{{.EditorLocale}}" maxlength="20" placeholder="默认（所有语言）；或 zh_CN">
+                    </div>
+                  </div>
+
+                  <div class="form-row" id="communication-audience">
+                    <div class="form-group col-md-4">
+                      <label for="communication-receiver">站内信收件人</label>
+                      <select id="communication-receiver" name="receiver" class="form-control">
+                        <option value="all" {{if eq .EditorReceiver "all"}}selected{{end}}>全部用户</option>
+                        <option value="normal" {{if eq .EditorReceiver "normal"}}selected{{end}}>普通用户</option>
+                        <option value="uid" {{if eq .EditorReceiver "uid"}}selected{{end}}>指定 UID</option>
+                        <option value="email" {{if eq .EditorReceiver "email"}}selected{{end}}>指定邮箱</option>
+                      </select>
+                    </div>
+                    <div class="form-group col-md-4">
+                      <label for="communication-uid">UID</label>
+                      <input id="communication-uid" class="form-control" name="uid" type="number" min="1" value="{{.EditorUID}}">
+                    </div>
+                    <div class="form-group col-md-4">
+                      <label for="communication-email">邮箱</label>
+                      <input id="communication-email" class="form-control" name="email" type="email" value="{{.EditorEmail}}">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-lg-6">
+                  <div class="card card-outline card-primary">
+                    <div class="card-header"><h2 class="card-title">内容设计器</h2></div>
+                    <div class="card-body">
+                      <div class="form-group">
+                        <label for="communication-mode">编辑模式</label>
+                        <select name="editor" id="communication-mode" class="form-control">
+                          <option value="blocks" {{if eq .EditorMode "blocks"}}selected{{end}}>可视化组件</option>
+                          <option value="source" {{if eq .EditorMode "source"}}selected{{end}}>Markdown / HTML 源码</option>
+                        </select>
+                      </div>
+                      <div id="communication-visual">
+                        <div class="btn-toolbar mb-3" role="toolbar" aria-label="添加组件">
+                          <button class="btn btn-default mr-2 mb-2" type="button" data-add="text">+ 文本</button>
+                          <button class="btn btn-default mr-2 mb-2" type="button" data-add="heading">+ 标题</button>
+                          <button class="btn btn-default mr-2 mb-2" type="button" data-add="alert">+ 提示框</button>
+                          <button class="btn btn-default mr-2 mb-2" type="button" data-add="collapse">+ 折叠卡片</button>
+                          <button class="btn btn-default mr-2 mb-2" type="button" data-add="divider">+ 分隔线</button>
+                        </div>
+                        <div id="communication-canvas" class="border rounded p-2 mb-3" style="min-height:90px" aria-label="组件列表"></div>
+                        <div id="communication-properties" hidden class="border rounded p-3">
+                          <h3 class="h6">组件属性</h3>
+                          <div class="form-group" id="block-title-group">
+                            <label for="block-title">标题</label>
+                            <input id="block-title" class="form-control" maxlength="200">
+                          </div>
+                          <div class="form-group" id="block-content-group">
+                            <label for="block-content">正文（支持 Markdown）</label>
+                            <textarea id="block-content" class="form-control" rows="6" maxlength="10000"></textarea>
+                          </div>
+                          <div class="form-group" id="block-tone-group">
+                            <label for="block-tone">颜色</label>
+                            <select id="block-tone" class="form-control">
+                              <option value="info">信息（青色）</option>
+                              <option value="success">成功（绿色）</option>
+                              <option value="warning">提醒（黄色）</option>
+                              <option value="danger">重要（红色）</option>
+                              <option value="primary">主题（蓝色）</option>
+                              <option value="secondary">次要（灰色）</option>
+                            </select>
+                          </div>
+                          <div class="form-check" id="block-expanded-group">
+                            <input id="block-expanded" class="form-check-input" type="checkbox">
+                            <label class="form-check-label" for="block-expanded">默认展开</label>
+                          </div>
+                        </div>
+                      </div>
+                      <div id="communication-source-panel" hidden>
+                        <label for="communication-source">Markdown / HTML</label>
+                        <textarea id="communication-source" name="source" class="form-control text-monospace" rows="18" maxlength="100000">{{.EditorSource}}</textarea>
+                        <button id="communication-import" type="button" class="btn btn-outline-primary mt-2">导入为可视化组件</button>
+                      </div>
+                      <p id="communication-editor-status" class="small text-muted mt-2 mb-0" role="status" aria-live="polite"></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <div class="card card-outline card-info">
+                    <div class="card-header"><h2 class="card-title">实时预览</h2></div>
+                    <div id="communication-preview" class="card-body" aria-live="polite" style="overflow-wrap:anywhere;max-height:850px;overflow:auto">正在准备预览…</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <button type="submit" name="operation" value="publish" class="btn btn-primary mr-2">{{if eq .EditingStatus "published"}}更新发布内容{{else}}发布{{end}}</button>
+                {{if ne .EditingStatus "published"}}
+                  <button type="submit" name="operation" value="draft" class="btn btn-default mr-2">保存草稿</button>
+                {{end}}
+                <a class="btn btn-default" href="/admin/communications">返回列表</a>
+              </div>
+            </form>
+            <script src="/app/communications.js" defer></script>
+          {{else}}
+            <p>
+              <a class="btn btn-primary" href="/admin/communications?new=1">新建站内信</a>
+              <a class="btn btn-default ml-2" href="/admin/communications?announcement=1">编辑站点公告</a>
+            </p>
+            <div class="card" id="communication-history">
+              <div class="card-header"><h2 class="card-title">站内信发布与草稿记录</h2></div>
+              <div class="card-body table-responsive">
+                <table class="table table-striped">
+                  <thead>
+                    <tr><th>标题</th><th>位置</th><th>状态</th><th>已读 / 投递</th><th>更新时间</th><th>操作</th></tr>
+                  </thead>
+                  <tbody>
+                    {{range .Communications}}
+                      <tr>
+                        <td>{{.Title}}</td>
+                        <td>{{.KindText}}</td>
+                        <td>{{.StatusText}}</td>
+                        <td>{{.ReadCount}} / {{.Delivery}}</td>
+                        <td>{{.UpdatedAt}}</td>
+                        <td class="text-nowrap">
+                          <a class="btn btn-default mr-2" href="{{.EditURL}}">编辑</a>
+                          {{if .CanWithdraw}}
+                            <form class="d-inline" method="post" action="{{.WithdrawURL}}">
+                              <input type="hidden" name="_token" value="{{$.CSRF}}">
+                              <button class="btn btn-danger" type="submit">撤回</button>
+                            </form>
+                          {{end}}
+                        </td>
+                      </tr>
+                    {{else}}
+                      <tr><td colspan="6">暂无记录。</td></tr>
+                    {{end}}
+                  </tbody>
+                </table>
+              </div>
+              <div class="card-footer clearfix">
+                <span class="text-muted float-left mt-2 mb-2 mr-3">共 {{.CommunicationPage.Total}} 条</span>
+                <div class="float-right">
+                  {{if .CommunicationPage.PrevURL}}<a class="btn btn-light" href="{{.CommunicationPage.PrevURL}}">上一页</a>{{end}}
+                  {{if .CommunicationPage.NextURL}}<a class="btn btn-light" href="{{.CommunicationPage.NextURL}}">下一页</a>{{end}}
+                </div>
+              </div>
+            </div>
+          {{end}}
+{{template "admin-close" .}}{{end}}

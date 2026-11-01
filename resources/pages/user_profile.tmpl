@@ -1,0 +1,110 @@
+{{define "user_profile"}}{{template "user-open" .}}
+          <div class="row">
+            <div class="col-md-6">
+              <div class="card card-primary">
+                <div class="card-header">
+                  <h3 class="card-title">{{t "user.profile.avatar.title"}}</h3>
+                </div>
+                <div class="card-body">
+                  {{t "user.profile.avatar.notice"}}
+                </div>
+                <div class="card-footer">
+                  <button class="btn btn-primary" id="reset-avatar">{{t "user.profile.avatar.reset"}}</button>
+                </div>
+              </div>
+
+              <form class="card card-warning" method="post" id="change-password">
+                <div class="card-header">
+                  <h3 class="card-title">{{t "user.profile.password.title"}}</h3>
+                </div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <label>{{t "user.profile.password.old"}}</label>
+                    <input type="password" class="form-control" name="oldPassword" required autocomplete="current-password">
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "user.profile.password.new"}}</label>
+                    <input type="password" class="form-control" name="newPassword" required minlength="8" maxlength="32" autocomplete="new-password">
+                  </div>
+                  <div class="form-group">
+                    <label>{{t "user.profile.password.confirm"}}</label>
+                    <input type="password" class="form-control" name="confirm" required minlength="8" maxlength="32" autocomplete="new-password">
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <button class="btn btn-primary" type="submit">{{t "user.profile.password.button"}}</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="col-md-6">
+              <form class="card card-primary" method="post" id="change-nickname">
+                <div class="card-header">
+                  <h3 class="card-title">{{t "user.profile.nickname.title"}}</h3>
+                </div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <input type="text" class="form-control" name="nickname" required value="{{.Nickname}}">
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <button class="btn btn-primary" type="submit">{{t "general.submit"}}</button>
+                </div>
+              </form>
+
+              <form class="card card-warning" method="post" id="change-email">
+                <div class="card-header">
+                  <h3 class="card-title">{{t "user.profile.email.title"}}</h3>
+                </div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <input type="email" class="form-control" name="email" required value="{{.Email}}" placeholder="{{t "user.profile.email.new"}}">
+                  </div>
+                  <div class="form-group">
+                    <input type="password" class="form-control" name="password" required placeholder="{{t "user.profile.email.password"}}" autocomplete="current-password">
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <button class="btn btn-primary" type="submit">{{t "user.profile.email.button"}}</button>
+                </div>
+              </form>
+
+              <div class="card card-danger">
+                <div class="card-header">
+                  <h3 class="card-title">{{t "user.profile.delete.title"}}</h3>
+                </div>
+                <div class="card-body">
+                  {{if .IsAdmin}}
+                    <p>{{t "user.profile.delete.admin"}}</p>
+                    <button class="btn btn-danger" disabled="disabled">{{t "user.profile.delete.button"}}</button>
+                  {{else}}
+                    <p>{{t "user.profile.delete.notice" "site" .SiteName}}</p>
+                    <button class="btn btn-danger" data-toggle="modal" data-target="#modal-delete-account">{{t "user.profile.delete.button"}}</button>
+                  {{end}}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <form id="modal-delete-account" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content bg-danger">
+                <div class="modal-header">
+                  <h5 class="modal-title">{{t "user.profile.delete.modal-title"}}</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <div style="white-space: pre-line">{{t "user.profile.delete.modal-notice"}}</div>
+                  <br>
+                  <input type="password" class="form-control" required name="password" placeholder="{{t "user.profile.delete.password"}}" autocomplete="current-password">
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                  <button type="button" class="btn btn-outline-light" data-dismiss="modal">{{t "general.close"}}</button>
+                  <button type="submit" class="btn btn-outline-light">{{t "general.submit"}}</button>
+                </div>
+              </div>
+            </div>
+          </form>
+{{template "user-close" .}}{{end}}

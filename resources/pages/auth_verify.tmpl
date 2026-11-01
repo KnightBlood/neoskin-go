@@ -1,0 +1,23 @@
+{{define "auth_verify"}}{{template "auth-open" .}}
+        <p class="login-box-msg">{{t "auth.bind.message"}}</p>
+        <form method="post">
+          <input type="hidden" name="_token" value="{{.CSRF}}">
+          <div class="input-group mb-3">
+            <input type="email" name="email" class="form-control" placeholder="{{t "auth.email"}}" required>
+            <div class="input-group-append">
+              <div class="input-group-text">
+                <i class="fas fa-envelope"></i>
+              </div>
+            </div>
+          </div>
+          {{if .Error}}
+            <div class="alert alert-danger">
+              <i class="icon fas fa-exclamation-triangle"></i>
+              {{.Error}}
+            </div>
+          {{end}}
+          <button type="submit" class="btn btn-primary btn-block">
+            {{t "general.submit"}}
+          </button>
+        </form>
+{{template "auth-close" .}}{{end}}

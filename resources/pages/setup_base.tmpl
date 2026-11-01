@@ -1,0 +1,20 @@
+{{define "setup-open"}}<!DOCTYPE html>
+<html lang="{{.Locale}}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{.CSRF}}">
+    <title>{{.Title}} - Blessing Skin Server</title>
+    <link href="/app/spectre.css" rel="stylesheet">
+    <link href="/app/style.css" rel="stylesheet">
+  </head>
+  <body class="container py-5">
+    <h1 class="h1">Blessing Skin Server</h1>
+    <h2 class="h4 text-muted mb-4">{{.Title}}</h2>
+    {{if .Error}}<div class="toast toast-error mb-3">{{.Error}}</div>{{end}}
+{{end}}
+
+{{define "setup-close"}}
+  </body>
+</html>
+{{end}}
