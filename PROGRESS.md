@@ -15,7 +15,7 @@
 | Go 代码规模 | `internal/` + `app/controllers` 约 50 个文件 |
 | 测试 | `go build ./...` / `go vet ./...` / `go test ./...` 全绿 |
 | 数据库矩阵 | SQLite + MySQL/MariaDB/PostgreSQL/WiltonDB 通过 |
-| 前端（next） | **0%**，计划已完成（共享项目 `../NeoSkinFrontend`），尚未搭建 |
+| 前端（next） | **0%**，计划已完成（`FRONTEND-REBUILD-PLAN.md`），尚未搭建 |
 
 > 说明：`/{player}.json`、`/csl/{player}.json` 由同一个 `/:player` handler 处理，
 > 已按功能计入覆盖。
@@ -34,7 +34,7 @@
 | Phase 6 模板/页面 | 100% | 首页 + 认证页 + 用户中心 + 皮肤库 + 管理端全部页面（含通信可视化编辑器）+ i18n |
 | Phase 7 插件系统 | 70% | 清单/启停/删除/上传/wget/市场 + Go 原生 Hook/Filter/Event 运行时；PHP 插件代码执行仍不支持 |
 | Phase 8 测试/CI | 100% | 单测 + 四库矩阵 + Go HTTP E2E + GitHub Actions 全绿 + 浏览器 E2E；新增 ACCEPTANCE/DEPLOYMENT/verify.ps1 |
-| Phase 9 前端重构 | 0% | 计划完成；源码在共享项目 `../NeoSkinFrontend`（React 19.3.1 + Vite 8.3.3；site TDesign、admin antd），Go 端接入见 `FRONTEND-INTEGRATION.md` |
+| Phase 9 前端重构 | 0% | 计划完成（React 19.3.1 + Vite 8.3.3；`frontend/site` TDesign、`frontend/admin` antd），P0 未开工 |
 
 ## 3. 已完成的功能
 
@@ -68,11 +68,9 @@
 
 ### 2026-11-01（本轮）
 - API 错误/成功消息接入语言包：新增 `t(ctx,key,...)` 请求级翻译器（locale + `language_lines` 覆盖），覆盖认证/找回/资料/玩家/衣柜/皮肤库/举报/管理端/插件/市场/更新等消息；实测 `?lang=zh_CN` 与 `?lang=en` 返回对应文案。
-- 前端重构计划拆分为**共享项目** `../NeoSkinFrontend`（不放在任何端口仓库内）：React 19.3 + Vite 8.3.3，两个独立 app（`apps/site` TDesign 1.18.6、`apps/admin` antd 6.6.8），含后端契约 v1、渐进切换（`FRONTEND_MODE=legacy|next`）、新增 JSON 接口、组件映射、7 周阶段、测试/CI/回滚。
-- 共享前端目录新增 `README.md`、`PLAN.md`、`docs/BACKEND-CONTRACT.md`（壳注入/CSRF/分页/10 个新增端点）、`docs/INTEGRATION.md`（四个端口接入步骤）。
-- 本仓库新增 `FRONTEND-INTEGRATION.md`（Go 端任务清单：壳路由、bootstrap、10 个端点、开关、发布、测试），移除原 `FRONTEND-REBUILD-PLAN.md`。
-- 核实前端版本可用性：`react@19.3.0`、`vite@8.3.3`、`tdesign-react@1.18.6`、`antd@6.6.8` 均存在且 peer 兼容；锁定 React 19.3.1 / TS 5.9.3 / React Router 8.5.1 / pnpm 12.16.1（偏差记录见共享前端 `PLAN.md` §1.1）。
-- `AGENTS.md` §2.6 调整为「双轨并存」：`legacy` 复用 `public/app` 并保留全部 DOM 契约，`next` 走共享前端 `../NeoSkinFrontend`。
+- 新增 `FRONTEND-REBUILD-PLAN.md`：React 19.3 + Vite 8.3.3 前端重构计划，两套独立项目（`frontend/site` TDesign 1.18.6、`frontend/admin` antd 6.6.8），含渐进切换（`FRONTEND_MODE=legacy|next`）、需补齐的 JSON 接口、组件映射、7 周阶段、测试/CI/回滚。
+- 核实前端版本可用性：`react@19.3.0`、`vite@8.3.3`、`tdesign-react@1.18.6`、`antd@6.6.8` 均存在且 peer 兼容；锁定 React 19.3.1 / TS 5.9.3 / React Router 8.5.1 / pnpm 12.16.1（偏差记录见计划 §1.2）。
+- `AGENTS.md` §2.6 调整为「双轨并存」：`legacy` 复用 `public/app` 并保留全部 DOM 契约，`next` 走新 SPA 目录。
 - 新增 `ACCEPTANCE.md`（HTTP/数据/前端契约/patch 功能/插件/CI 验收清单与已知限制）、`DEPLOYMENT.md`（构建/env/建表/前端资源/反向代理/迁移/更新/回滚）、`scripts/verify.ps1`。
 - 浏览器 E2E 修复：JSON `Content-Type` 去 charset（前端 fetch 严格匹配）、登录响应 `data.redirectTo`、admin `blessing-extra` 空对象、玩家/衣柜页补充 `#previewer` 与 rule/length/unverified、安装向导使用带 hash 的 CSS；新增 `scripts/copy-frontend.ps1` 复制预编译前端资源。
 - 新增 `.github/workflows/ci.yml`：build/vet/test + MySQL/MariaDB/PostgreSQL/SQL Server 四库矩阵；新增 `tests/e2e`（构建二进制 → 建表 → 启动 → 探测首页/认证/安装/语言包/API/头像/权限跳转）。
@@ -128,11 +126,8 @@
 
 ## 6. 下一步
 
-1. **共享前端 P0**：在 `../NeoSkinFrontend` 搭建 `apps/site`（TDesign）与 `apps/admin`（antd）骨架 ——
-   Vite 8.3.3 + React 19.3.1 + TS 5.9.3、`packages/core`（CSRF/401/419）、i18n、主题、CI。
-2. **Go 端接入 P1**：壳路由（`/app-next/site|admin`）+ `FRONTEND_MODE` 开关 + `/api/bootstrap`；
-   首页与认证页先行（见 `FRONTEND-INTEGRATION.md`）。
-3. 补齐契约 v1 新增端点：`/api/user/inbox`、`/api/user/reports`、`/api/admin/communications`、
-   `/api/admin/dashboard`、`/api/admin/options/{group}`、`/api/admin/status`、`/api/admin/update/info`。
-4. 其余三个端口按 `NeoSkinFrontend/docs/INTEGRATION.md` 接入，并跑 `contract-check.mjs`。
-5. 可选增强：浏览器 E2E 纳入 CI、PHP 插件兼容层、WebP 编码器回退策略复核。
+1. **前端重构 P0**：搭建 `frontend/site`（TDesign）与 `frontend/admin`（antd）骨架 ——
+   Vite 8.3.3 + React 19.3.1 + TS 5.9.3、请求层（CSRF/401/419）、i18n、主题、CI。
+2. **前端重构 P1**：SPA 壳路由 + `FRONTEND_MODE` 开关；首页与认证页（登录/注册/找回/重置/验证/绑定）。
+3. 后端补齐 SPA 所需的 JSON 接口（`/api/bootstrap`、`/api/user/inbox`、`/api/admin/status` 等，见计划 §3.2）。
+4. 可选增强：浏览器 E2E 纳入 CI、PHP 插件兼容层、WebP 编码器回退策略复核。
