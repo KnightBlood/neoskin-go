@@ -63,9 +63,10 @@
   - 站内信：`GET /user/inbox`、`GET /user/inbox/{id}`（读取即标记已读）、
     `POST /user/notifications/{id}`、`GET /api/user/notifications`；
     手工验证发布 → inbox 出现 → 详情 → mark read 通过。
-  - **TODO**：Laravel 登录会 `regenerate` session id；Goravel 的 session cookie 在
-    middleware `Next()` 之前写出，regenerate 后需要额外 `WriteCookie`，当前先不 regenerate。
-- 路由契约：**174** 条（`codegraph/routes.json` 173 条漏记 `POST skinlib`）。
+  - **已解决（2026-11-02）**：登录/注册即调用 `session.Regenerate(true)` 轮换
+    session ID（session fixation 防护），随后再调一次
+    `session.WriteCookie(ctx, sess)` 重写下发新 ID（gin 驱动 `removeSetCookie`
+    同名覆盖，framework 注释亦明确要求轮换后重写）。- 路由契约：**174** 条（`codegraph/routes.json` 173 条漏记 `POST skinlib`）。
 - 业务控制器/模板/OAuth2 尚未开始。
 
 ## 2. 已确认的跨语言契约
@@ -123,6 +124,16 @@
 - **webp**：目前只输出 PNG（`image/png`），不区分源 `?png`；Go 侧未引入 webp 编码器。
 - **头像回退**：默认头像/默认皮肤通过 `go:embed` 内嵌在 `internal/resources`。
 - **模板**：Go `html/template`，验收以 Java/.NET 的 DOM 契约为准，不追求 Twig 语法。
+- **remember me（2026-11-02）**：PHP `Auth::login($user, $keep)` 的 recaller
+  cookie 值会被 Laravel 的 `EncryptCookies` 中间件整体加密（APP_KEY）；Go 版
+  不实现该对称加密层，cookie 值改为
+  `uid|remember_token|hmac(sha256, password_hash, APP_KEY)`：
+  cookie 名仍为 `remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d`，
+  HttpOnly + SameSite=Lax + Path=/，有效期 5 年（`auth.reminders.expire`
+  默认 2628000 分钟）。校验语义与 PHP 等价：token 对应
+  `retrieveByToken(id, token)`；第三段密码 HMAC 对应 PHP
+  `hashPasswordForCookie` 的 `hash_equals`（改密后旧 cookie 立即失效）；
+  `logout()` 轮换 remember_token（`cycleRememberToken`）并下发过期 cookie。
 
 ## 4. 数据库矩阵（已跑通）
 
@@ -165,7 +176,5 @@ go test ./internal/db -run TestMatrix -v
 - **webp 头像**：目前只有 PNG 编码器，`<picture>` 的 source 也改为 `image/png`，
   避免浏览器按 webp 类型取到 PNG 后解码失败。
 
-## 7. Go 版本
-
-- `go.mod` 要求 **Go 1.26**：依赖链中的 `golang.org/x/crypto v0.58.0` 声明 `go 1.26.0`，因此 CI 的 `setup-go` 固定 `1.26`。本地开发使用 1.27 亦可向下兼容编译。
+## 7. Go 版本- `go.mod` 要求 **Go 1.26**：依赖链中的 `golang.org/x/crypto v0.58.0` 声明 `go 1.26.0`，因此 CI 的 `setup-go` 固定 `1.26`。本地开发使用 1.27 亦可向下兼容编译。
 

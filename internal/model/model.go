@@ -2,20 +2,21 @@ package model
 
 // User 对应 users 表（认证/权限用到的列）。
 type User struct {
-	UID          int
-	Email        string
-	Nickname     string
-	Password     string
-	Permission   int
-	Avatar       int
-	Score        int
-	Verified     bool
-	DarkMode     bool
-	Locale       string
-	IP           string
-	RegisterAt   string
-	LastSignAt   string
-	Verification string
+	UID           int
+	Email         string
+	Nickname      string
+	Password      string
+	Permission    int
+	Avatar        int
+	Score         int
+	Verified      bool
+	DarkMode      bool
+	Locale        string
+	IP            string
+	RegisterAt    string
+	LastSignAt    string
+	Verification  string
+	RememberToken string
 }
 
 const (

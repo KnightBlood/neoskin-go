@@ -110,7 +110,7 @@ func (r *AuthController) Login(ctx goravelhttp.Context) goravelhttp.Response {
 		})
 	}
 
-	if err := auth.Login(ctx, user.UID); err != nil {
+	if err := auth.Login(ctx, users, user.UID, truthy(ctx.Request().Input("keep"))); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
 	// PHP：登录成功后清空失败计数（Session::forget + Cache::forget）。
@@ -126,7 +126,12 @@ func (r *AuthController) Login(ctx goravelhttp.Context) goravelhttp.Response {
 
 // Logout 处理 POST /auth/logout。
 func (r *AuthController) Logout(ctx goravelhttp.Context) goravelhttp.Response {
-	if err := auth.Logout(ctx); err != nil {
+	conn, dialect, err := runtime.Connection()
+	if err != nil {
+		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
+	}
+	users := repo.NewUserRepository(conn, dialect)
+	if err := auth.Logout(ctx, users); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
 
@@ -284,7 +289,7 @@ func (r *AuthController) Register(ctx goravelhttp.Context) goravelhttp.Response 
 		}
 	}
 
-	if err := auth.Login(ctx, uid); err != nil {
+	if err := auth.Login(ctx, users, uid, false); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
 	plugin.DefaultDispatcher.Dispatch(plugin.Event{Name: plugin.EventUserRegistered, Payload: uid})

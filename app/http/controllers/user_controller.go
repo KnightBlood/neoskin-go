@@ -110,7 +110,7 @@ func (r *UserController) HandleProfile(ctx goravelhttp.Context) goravelhttp.Resp
 		}
 		plugin.DefaultDispatcher.Dispatch(plugin.Event{Name: plugin.EventUserProfileUpdated,
 			Payload: map[string]any{"uid": user.UID, "action": "password"}})
-		_ = auth.Logout(ctx)
+		_ = auth.Logout(ctx, users)
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
 			"code": 0, "message": t(ctx, "user.profile.password.success"),
 		})
@@ -138,7 +138,7 @@ func (r *UserController) HandleProfile(ctx goravelhttp.Context) goravelhttp.Resp
 		}
 		plugin.DefaultDispatcher.Dispatch(plugin.Event{Name: plugin.EventUserProfileUpdated,
 			Payload: map[string]any{"uid": user.UID, "action": "email"}})
-		_ = auth.Logout(ctx)
+		_ = auth.Logout(ctx, users)
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
 			"code": 0, "message": t(ctx, "user.profile.email.success"),
 		})
@@ -158,7 +158,7 @@ func (r *UserController) HandleProfile(ctx goravelhttp.Context) goravelhttp.Resp
 		if err := users.Delete(user.UID); err != nil {
 			return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 		}
-		_ = auth.Logout(ctx)
+		_ = auth.Logout(ctx, users)
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
 			"code": 0, "message": t(ctx, "user.profile.delete.success"),
 		})

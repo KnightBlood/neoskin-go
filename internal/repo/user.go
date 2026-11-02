@@ -21,7 +21,8 @@ func NewUserRepository(conn *sql.DB, dialect *db.Dialect) *UserRepository {
 }
 
 const userColumns = `uid, email, nickname, password, permission, avatar, score,
-	verified, is_dark_mode, locale, ip, register_at, last_sign_at, verification_token`
+	verified, is_dark_mode, locale, ip, register_at, last_sign_at,
+	verification_token, remember_token`
 
 func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
 	return r.findOne(`SELECT `+userColumns+` FROM users WHERE email = ?`, email)
@@ -47,10 +48,10 @@ func (r *UserRepository) findOne(query string, args ...any) (*model.User, error)
 
 func scanUser(rows *sql.Rows) (*model.User, error) {
 	var user model.User
-	var verified, darkMode, locale, registerAt, lastSignAt, verification any
+	var verified, darkMode, locale, registerAt, lastSignAt, verification, rememberToken any
 	if err := rows.Scan(&user.UID, &user.Email, &user.Nickname, &user.Password,
 		&user.Permission, &user.Avatar, &user.Score, &verified, &darkMode,
-		&locale, &user.IP, &registerAt, &lastSignAt, &verification); err != nil {
+		&locale, &user.IP, &registerAt, &lastSignAt, &verification, &rememberToken); err != nil {
 		return nil, err
 	}
 
@@ -60,6 +61,7 @@ func scanUser(rows *sql.Rows) (*model.User, error) {
 	user.RegisterAt = db.TimeString(registerAt)
 	user.LastSignAt = db.TimeString(lastSignAt)
 	user.Verification = stringValue(verification)
+	user.RememberToken = stringValue(rememberToken)
 
 	return &user, nil
 }
@@ -171,6 +173,14 @@ func (r *UserRepository) UpdateNickname(uid int, nickname string) error {
 func (r *UserRepository) UpdatePassword(uid int, password string) error {
 	_, err := r.DB.Exec(db.Rebind(r.Dialect, `UPDATE users SET password = ? WHERE uid = ?`),
 		password, uid)
+	return err
+}
+
+// UpdateRememberToken 写入（轮换）remember_token；token 传空串可吊销所有
+// 已记住设备（等价 Laravel cycleRememberToken / 清除）。
+func (r *UserRepository) UpdateRememberToken(uid int, token string) error {
+	_, err := r.DB.Exec(db.Rebind(r.Dialect,
+		`UPDATE users SET remember_token = ? WHERE uid = ?`), token, uid)
 	return err
 }
 

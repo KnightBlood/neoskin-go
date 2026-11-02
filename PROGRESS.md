@@ -65,6 +65,29 @@
 ## 5. 变更记录
 
 ### 2026-11-02（本轮）
+
+- **remember me「记住我」对齐 PHP `Auth::login($user, $keep)`**：
+  - `auth.Login(ctx, users, uid, remember)`：登录即 `session.Regenerate(true)` 轮换
+    session ID（消除 session fixation TODO），再调 `session.WriteCookie` 重写 cookie
+    （gin 驱动 `removeSetCookie` 同名覆盖）；`keep` 为真时走 Laravel
+    `ensureRememberTokenIsSet`（token 空则生成 60 位随机值并落库）+ 下发
+    `remember_web_59ba36…` 长效 cookie（5 年、HttpOnly、SameSite=Lax、Path=/）。
+  - `CurrentUser`：session 未命中时回退 remember cookie（等价 `userFromRecaller`：
+    uid + remember_token + 密码 HMAC 三段匹配，改密后旧 cookie 自动失效），
+    命中后重建 session 登录态。
+  - `auth.Logout(ctx, users)`：等价 Laravel `logout()` —— 记住 cookie 存在则下发
+    过期 cookie，remember_token 非空则轮换（`cycleRememberToken`）使所有已记住设备失效。
+  - 登录态读 session 还写入 Laravel 同名键 `password_hash_login_web_59ba36…`。
+  - 偏差（已记录 `PORT-NOTES.md`）：PHP recaller cookie 值经 `EncryptCookies`
+    整体加密；Go 版以 `uid|token|hmac(sha256, password_hash, NEOSKIN_APP_KEY)`
+    替代（不加密但不可伪造），第三段语义与 PHP `hash_equals` 校验一致。
+- 登出/改密/改邮箱/删号四处调用点同步新签名；`UserRepository` 新增
+  `UpdateRememberToken`，`userColumns`/scan 补 `remember_token` 列，`model.User`
+  补 `RememberToken` 字段。
+- 验证：`go build/vet/test ./...` 全绿；手工 HTTP：登录（keep=true）响应同一请求
+  内 session ID 轮换 + remember cookie 下发；仅凭 remember cookie（无 session id）
+  访问 `/user/profile` 恢复登录态；篡改 HMAC 段被拒；logout 后 DB token 轮换 +
+  旧 cookie 失效；不带 `keep` 的登录不下发 remember cookie。
 - 登录安全对齐 PHP `AuthController`：新增 `internal/captcha` 失败计数器：
   - 按进程内缓存实现按 IP 的登录失败计数（失败 +1 且刷新 1h TTL，成功登录清零），超过 3 次要求验证码；
   - 登录页 `#blessing-extra` 按 IP 计数输出 `tooManyFails`；
