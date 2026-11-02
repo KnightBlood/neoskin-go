@@ -11,6 +11,7 @@ import (
 	"neoskin/app/facades"
 	"neoskin/app/http/controllers"
 	oauthmw "neoskin/app/http/middleware"
+	"neoskin/internal/plugin"
 )
 
 func Web() {
@@ -43,7 +44,9 @@ func Web() {
 	oauthController := controllers.NewOAuthController()
 	facades.Route().Post("/oauth/token", oauthController.Token)
 
-	web := facades.Route().Middleware(
+	// Hook::pushMiddleware 追加的全局中间件挂在链尾（Laravel pushMiddleware
+	// 追加到全局栈末尾；Go 约定在路由注册前 push）。
+	groupMiddlewares := append([]http.Middleware{
 		sessionmiddleware.StartSession(),
 		oauthmw.DetectLocale("zh_CN"),
 		oauthmw.NormalizeJSONContentType(),
@@ -51,7 +54,8 @@ func Web() {
 		httpmiddleware.VerifyCsrfToken([]string{"api", "api/*"}),
 		// RouteServiceProvider：api 中间件组在生产环境带 throttle:60,1（testing 跳过）。
 		oauthmw.APIThrottle(60),
-	)
+	}, plugin.DefaultHook.PushedMiddlewares()...)
+	web := facades.Route().Middleware(groupMiddlewares...)
 	web.Group(func(router route.Router) {
 		router.Get("/", homeController.Index)
 		authController := controllers.NewAuthController()
@@ -246,4 +250,12 @@ func Web() {
 
 	facades.Route().Static("app", "./public/app")
 	facades.Route().Static("public", "./public")
+
+	// 与 PHP RouteServiceProvider 一致：核心路由注册完成后派发 ConfigureRoutes，
+	// 插件经 Hook::addRoute 注册的回调此时收到路由器；再派发事件给直接监听者。
+	plugin.DefaultHook.ApplyRoutes(facades.Route())
+	plugin.DefaultDispatcher.Dispatch(plugin.Event{
+		Name:    plugin.EventConfigureRoutes,
+		Payload: facades.Route(),
+	})
 }

@@ -139,6 +139,20 @@
   （签名 sha1(method|path|ip)；Goravel memory cache 的 Increment 只认 `*int64`
   指针，计数基值/回填均存指针）。api 组生产环境全局 `throttle:60,1`
   （`APIThrottle`，testing 跳过）由 RouteServiceProvider 确认移植。
+- **插件 Hook 7 方法（2026-11-02）**：`addRoute` 以回调形式保存，核心路由注册
+  完成后由 `Hook.ApplyRoutes` 统一执行，再派发 `ConfigureRoutes`（payload 为
+  goravel `route.Router`；PHP 为 `$event->router`）。`pushMiddleware` 收集后由
+  `routes/web.go` 挂到 web 组中间件链尾——Go 的中间件链在 boot 期一次性建立，
+  因此要求 push 在路由注册前调用；PHP 运行期 push 同样只对后续请求生效，
+  语义等价。`sendNotification` 直接写 notifications 表（type
+  `App\Notifications\SiteMessage`、notifiable_type `App\Models\User`，data 仅
+  `{title, content}`），等价 SiteMessage 无 communication 关联的场景；Go 各
+  通知读取路径用 `data["format"]` 取值，缺失为 nil，安全。
+- **事件派发口径（2026-11-02 复核）**：PHP 全源 `event(new` / `dispatch(new`
+  仅命中 5 处：`RouteServiceProvider:36`（ConfigureRoutes）与
+  `PluginManager` 的 PluginBootFailed/WasEnabled/WasDisabled/WasDeleted；
+  `Event::dispatch` 无命中。因此 `UserTryToLogin` 与抽象基类 `Event` 在 PHP
+  从不派发，Go 保持不派发即等价，不需要额外接线。
 
 ## 4. 数据库矩阵（已跑通）
 

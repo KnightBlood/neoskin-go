@@ -66,6 +66,30 @@
 
 ### 2026-11-02（本轮）
 
+- **插件 Hook 3 方法补齐 + `ConfigureRoutes` 派发**（第 4 项差距）：
+  - `internal/plugin/hooks.go`：`Hook` 补 `AddRoute`（存回调）、`ApplyRoutes`
+    （路由注册完成后统一执行回调）、`PushMiddleware`/`PushedMiddlewares`
+    （收集全局中间件，由 `routes/web.go` 挂入 web 组链尾）、
+    `SendNotification(uids, title, content, conn, dialect)`（直接写 notifications
+    表，`data` 仅 `{title, content}`，等价 PHP `Hook::sendNotification` 的
+    SiteMessage 无 communication 关联场景；各通知读取路径对缺失 `format` 键安全）。
+  - 事件派发口径复核：PHP 全源 `event(new` 命中仅 5 处（ConfigureRoutes +
+    PluginManager 4 个插件生命周期事件）；`UserTryToLogin` 与抽象基类 `Event`
+    在 PHP 同样从不派发——Go 保持不派发即等价，无需接线。
+  - `routes/web.go`：web 组中间件链改为「5 个既有中间件 + Hook pushed 链尾」；
+    核心路由注册完成后 `plugin.DefaultHook.ApplyRoutes(facades.Route())` +
+    `Dispatch(EventConfigureRoutes)`（payload = goravel route.Router，
+    时序与 PHP `RouteServiceProvider:36` 一致）。
+  - 单测 `internal/plugin/hooks_test.go` 新增三个：用 framework 自带
+    `mocks/route` 验证 AddRoute/ApplyRoutes 回调收到路由器、nil 跳过、
+    重复 ApplyRoutes 可重入；PushMiddleware 顺序与返回拷贝语义；
+    SendNotification 用 sqlite 建库验证落库行数、`type`、`data` 键集合与
+    `read_at` 为 NULL。
+  - `go.mod`：引入 framework 的 route mocks（间接依赖 `stretchr/objx`）。
+  - 验证：`go build/vet/test ./...` 全绿；e2e 启动真实服务覆盖新派发路径。
+  - 说明：in-tree 尚无 DefaultHook 消费方（插件为外部扩展点），故以单测
+    与 e2e 覆盖；不做浏览器验证。
+
 - **限流对齐 PHP 路由 `throttle:N,1`**（第 3 项差距）：
   - 新增 `app/http/middleware/throttle.go`：复刻 Laravel `ThrottleRequests` +
     `Illuminate\Cache\RateLimiter` —— 签名 `sha1(method|path|ip)`、Goravel Cache
@@ -168,6 +192,8 @@
 
 ## 6. 下一步
 
-1. 管理端剩余页面：options/score/resource/customize/communications/update（`OptionForm` 表单渲染 + 通信编辑器）。
-2. 插件原生运行时（Hook 7 方法、24 个 Event）、插件市场缓存/分页。
-3. HTTP/浏览器 E2E 与 CI 五库矩阵；webp 编码器。
+1. 422 校验消息本地化（校验层全英文常量 → 按 locale 返回，对齐 PHP translator）。
+2. 浏览器 E2E 进 CI + race / 覆盖率 / 安全用例。
+3. 文档校准（PROGRESS 阶段百分比、ACCEPTANCE.md Hook 7 方法表述等）。
+4. 前端 P0：`NeoSkinFrontend` workspace + `apps/site`(TDesign) / `apps/admin`(antd)
+   / `packages/core` / `packages/contract` 骨架（写前端代码前不动后端文档）。
