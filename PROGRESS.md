@@ -1,7 +1,7 @@
 # NeoSkinGo — 进度快照
 
 > 每次会话结束更新本文件，并在回复末尾给出「进度」一行。
-> 最后更新：2026-11-01。
+> 最后更新：2026-11-02。
 > 仓库：<https://github.com/KnightBlood/neoskin-go>
 
 ## 1. 总览
@@ -63,6 +63,14 @@
 `/csl/{player}.json` 共用一个 handler）。
 
 ## 5. 变更记录
+
+### 2026-11-02（本轮）
+- 登录安全对齐 PHP `AuthController`：新增 `internal/captcha` 失败计数器：
+  - 按进程内缓存实现按 IP 的登录失败计数（失败 +1 且刷新 1h TTL，成功登录清零），超过 3 次要求验证码；
+  - 登录页 `#blessing-extra` 按 IP 计数输出 `tooManyFails`；
+  - 未注册账号返回 `code:2 + auth.validation.user`（用户不存在），且不计入失败次数（与 PHP 一致）。
+- 新增 reCAPTCHA v2 线上校验：`verifyCaptcha(ctx, options, input)` 实现 PHP `Rules\Captcha` 语义——配置 `recaptcha_secretkey` 时走 `recaptcha.net/api/siteverify`，否则消费本地 session 验证码；接入登录（失败 >3 次）、注册、忘记密码三条链路。
+- 单测：`internal/captcha`（siteverify 成功/失败/无可达网络、失败计数增/查/清零/过期）；HTTP 手工验证：失败计数 1..4 → 第 5 次触发 422 captcha、登录页 `tooManyFails:true`、重启后归零、未注册账号 code 2。
 
 ### 2026-11-01（本轮）
 - API 错误/成功消息接入语言包：新增 `t(ctx,key,...)` 请求级翻译器（locale + `language_lines` 覆盖），覆盖认证/找回/资料/玩家/衣柜/皮肤库/举报/管理端/插件/市场/更新等消息；实测 `?lang=zh_CN` 与 `?lang=en` 返回对应文案。

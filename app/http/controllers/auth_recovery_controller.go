@@ -31,21 +31,23 @@ func (r *AuthController) Forgot(ctx goravelhttp.Context) goravelhttp.Response {
 // HandleForgot 处理 POST /auth/forgot。
 func (r *AuthController) HandleForgot(ctx goravelhttp.Context) goravelhttp.Response {
 	email := strings.TrimSpace(ctx.Request().Input("email"))
+	_, conn, dialect, err := currentUser(ctx)
+	if err != nil {
+		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
+	}
+	options := service.NewOption(conn, dialect)
+
 	errs := map[string][]string{}
 	if email == "" || !strings.Contains(email, "@") {
 		errs["email"] = []string{"The email field is required."}
 	}
-	if !consumeCaptcha(ctx, ctx.Request().Input("captcha")) {
+	if !verifyCaptcha(ctx, options, ctx.Request().Input("captcha")) {
 		errs["captcha"] = []string{"The captcha is incorrect."}
 	}
 	if len(errs) > 0 {
 		return validationFailed(ctx, errs)
 	}
 
-	_, conn, dialect, err := currentUser(ctx)
-	if err != nil {
-		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
-	}
 	ip := ctx.Request().Ip()
 	cacheKey := fmt.Sprintf("%x", sha1.Sum([]byte("last_mail_"+ip)))
 	if last := facades.Cache().GetInt(cacheKey, 0); last > 0 {

@@ -30,8 +30,9 @@ func (r *AuthController) LoginPage(ctx goravelhttp.Context) goravelhttp.Response
 		return ctx.Response().Redirect(nethttp.StatusFound, "/user")
 	}
 	options := pageOptions()
+	tooManyFails := captcha.LoginFails().Count(ctx.Request().Ip()) > captchaRequiredFails
 	return renderAuthPage(ctx, "auth_login", "auth.login.title", map[string]any{
-		"tooManyFails": false,
+		"tooManyFails": tooManyFails,
 		"recaptcha":    options.Get("recaptcha_sitekey"),
 		"invisible":    options.Bool("recaptcha_invisible", false),
 	}, pullFlash(ctx, "msg"), "", "")
@@ -60,6 +61,16 @@ func (r *AuthController) Login(ctx goravelhttp.Context) goravelhttp.Response {
 	users := repo.NewUserRepository(conn, dialect)
 	players := repo.NewPlayerRepository(conn, dialect)
 
+	// PHP：同一 IP 登录失败超过 3 次后要求验证码（本地验证码或 reCAPTCHA）。
+	loginFails := captcha.LoginFails().Count(ctx.Request().Ip())
+	if loginFails > captchaRequiredFails {
+		if !verifyCaptcha(ctx, service.NewOption(conn, dialect), ctx.Request().Input("captcha")) {
+			return validationFailed(ctx, map[string][]string{
+				"captcha": {"The captcha is incorrect."},
+			})
+		}
+	}
+
 	var user *model.User
 	if strings.Contains(identification, "@") {
 		user, err = users.FindByEmail(identification)
@@ -70,7 +81,7 @@ func (r *AuthController) Login(ctx goravelhttp.Context) goravelhttp.Response {
 			if player.Permission == model.PermissionBanned {
 				return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
 					"code": 1, "message": t(ctx, "auth.check.banned"),
-					"data": goravelhttp.Json{"login_fails": 1},
+					"data": goravelhttp.Json{"login_fails": loginFails},
 				})
 			}
 			user, err = users.FindByID(player.UID)
@@ -80,10 +91,17 @@ func (r *AuthController) Login(ctx goravelhttp.Context) goravelhttp.Response {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
 
-	if user == nil || !php.VerifyPassword(user.Password, password) {
+	if user == nil {
+		// PHP：账号不存在返回 code 2 + auth.validation.user，且不计入失败次数。
+		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
+			"code": 2, "message": t(ctx, "auth.validation.user"),
+		})
+	}
+	if !php.VerifyPassword(user.Password, password) {
+		fails := captcha.LoginFails().Increment(ctx.Request().Ip())
 		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
 			"code": 1, "message": t(ctx, "auth.validation.password"),
-			"data": goravelhttp.Json{"login_fails": 1},
+			"data": goravelhttp.Json{"login_fails": fails},
 		})
 	}
 	if user.Permission == model.PermissionBanned {
@@ -95,6 +113,8 @@ func (r *AuthController) Login(ctx goravelhttp.Context) goravelhttp.Response {
 	if err := auth.Login(ctx, user.UID); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
+	// PHP：登录成功后清空失败计数（Session::forget + Cache::forget）。
+	captcha.LoginFails().Reset(ctx.Request().Ip())
 	plugin.DefaultDispatcher.Dispatch(plugin.Event{Name: plugin.EventUserLoggedIn, Payload: user.UID})
 	plugin.DefaultDispatcher.Dispatch(plugin.Event{Name: plugin.EventUserAuthenticated, Payload: user.UID})
 
@@ -215,13 +235,7 @@ func (r *AuthController) Register(ctx goravelhttp.Context) goravelhttp.Response 
 		errs["nickname"] = []string{"The nickname field is required."}
 	}
 
-	expected := ""
-	if session := ctx.Request().Session(); session != nil {
-		if value := session.Pull("captcha"); value != nil {
-			expected = fmt.Sprint(value)
-		}
-	}
-	if expected == "" || !strings.EqualFold(expected, captchaInput) {
+	if !verifyCaptcha(ctx, options, captchaInput) {
 		errs["captcha"] = []string{"The captcha is incorrect."}
 	}
 
