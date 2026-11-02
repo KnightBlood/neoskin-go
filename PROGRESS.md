@@ -32,7 +32,7 @@
 | Phase 5 安装向导 | 100% | `/setup` 欢迎页、数据库表单、信息表单、完成页（HTML）+ 建表/管理员/install.lock |
 | Phase 6 模板/页面 | 100% | 首页 + 认证页 + 用户中心 + 皮肤库 + 管理端全部页面（含通信可视化编辑器）+ i18n |
 | Phase 7 插件系统 | 75% | 清单/启停/删除/上传/wget/市场 + Go 原生 Hook/Filter/Event 运行时；PHP 插件代码执行仍不支持 |
-| Phase 8 测试/CI | 100% | 单测 + 四库矩阵 + Go HTTP E2E + GitHub Actions 全绿 + 浏览器 E2E；新增 ACCEPTANCE/DEPLOYMENT/verify.ps1 |
+| Phase 8 测试/CI | 100% | 单测 + 四库矩阵 + Go HTTP E2E + race/覆盖率 + 浏览器 E2E + 安全用例 + GitHub Actions 全绿；新增 ACCEPTANCE/DEPLOYMENT/verify.ps1 |
 
 ## 3. 已完成的功能
 
@@ -65,6 +65,34 @@
 ## 5. 变更记录
 
 ### 2026-11-02（本轮）
+
+- **CI 安全/质量门禁 + 浏览器 E2E + 后台页面守卫**（第 6 项差距）：
+  - 新增 `tests/support`：抽出 E2E 共用的「构建 → 建表 → 启动 → 健康检查 →
+    清理」harness，`tests/e2e` 改为复用。
+  - 新增 `tests/e2e/security_test.go`（直连 SQLite 建管理员/普通用户）：
+    - 未登录访问 `/admin`、`/admin/users`、`/admin/update`、`/user`、`/user/inbox`
+      均 302 → `/auth/login`；`/api/user` 保持 JSON 401；
+    - 缺 CSRF token 的 POST → 419；带 token 的空登录 → 422；
+    - 登录后 session ID 轮换、`/admin` 可访问；登出后 `/user` 302；
+    - remember cookie：HttpOnly、无 session 时恢复登录、篡改 HMAC 段被拒；
+    - 普通用户访问后台页面与 `/admin/users/list` → 403。
+  - 修复后台页面守卫：新增 `requireAdminPage`（对应 PHP `authorize` +
+    `can:admin`）——未登录浏览器请求 302 登录页而不是 JSON 401；替换
+    `adminPageData` 与 4 个页面入口；顺带修复 `UsersPage` 忽略
+    `requireAdmin` 响应导致游客访问 nil deref 的隐患。
+  - 新增 `tests/browser`（Playwright `playwright-core` + 系统 Chrome，不下载
+    浏览器）：Go 测试启动真实服务并播种管理员，`node flows.mjs` 执行
+    首页/登录/皮肤库/上传页/用户中心/后台三页流程，断言 `window.blessing`、
+    关键元素与**零 console error**。默认跳过，`NEOSKIN_BROWSER_E2E=1` 启用。
+  - `public/app` 仍不入库：CI 从上游 6.0.10 发布包下载前端产物（SHA-256
+    固定校验）后再跑浏览器 E2E；本地用 `scripts/copy-frontend.ps1`。
+  - `.github/workflows/ci.yml` 新增：
+    - `race-coverage`：`go test ./... -race -covermode=atomic
+      -coverprofile=coverage.out` + 覆盖率摘要 + artifact；
+    - `browser-e2e`：Node 22 + `npm ci --prefix tests/browser` + 下载前端
+      产物 + 系统 Chrome 跑 `go test ./tests/browser`。
+  - 本地验证：`go build/vet/test ./...` 全绿；浏览器 E2E 本机通过（6.0.10
+    产物，登录/上传页/后台均无 console error）。
 
 - **422 校验消息本地化 + Laravel ValidationException 语义**（第 5 项差距）：
   - 新增 `app/http/controllers/validation.go`：`validationFailed` 的 `message`
@@ -220,7 +248,6 @@
 
 ## 6. 下一步
 
-1. 浏览器 E2E 进 CI + race / 覆盖率 / 安全用例。
-2. 文档校准（PROGRESS 阶段百分比、ACCEPTANCE Hook 7 方法表述等）。
-3. 前端 P0：`NeoSkinFrontend` workspace + `apps/site`(TDesign) / `apps/admin`(antd)
+1. 文档校准（PROGRESS 阶段百分比、ACCEPTANCE Hook 7 方法表述等）。
+2. 前端 P0：`NeoSkinFrontend` workspace + `apps/site`(TDesign) / `apps/admin`(antd)
    / `packages/core` / `packages/contract` 骨架（写前端代码前不动后端文档）。

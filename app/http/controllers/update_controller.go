@@ -106,7 +106,7 @@ func (r *UpdateController) Show(ctx goravelhttp.Context) goravelhttp.Response {
 
 // UpdatePage 处理 GET /admin/update（HTML 页面）。
 func (r *UpdateController) UpdatePage(ctx goravelhttp.Context) goravelhttp.Response {
-	if _, _, _, resp := requireAdmin(ctx); resp != nil {
+	if _, _, _, resp := requireAdminPage(ctx); resp != nil {
 		return resp
 	}
 	current := facades.Config().GetString("app.version", "6.0.11_patch")

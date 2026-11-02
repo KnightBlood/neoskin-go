@@ -291,3 +291,21 @@ func requireAdmin(ctx goravelhttp.Context) (*model.User, *sql.DB, *db.Dialect,
 	}
 	return user, conn, dialect, nil
 }
+
+// requireAdminPage 是后台 HTML 页面的守卫，对应 PHP 的
+// `authorize` + `can:admin` 中间件：未登录的浏览器请求重定向到登录页
+// （而不是返回 JSON 401），已登录但非管理员返回 403。
+func requireAdminPage(ctx goravelhttp.Context) (*model.User, *sql.DB, *db.Dialect,
+	goravelhttp.Response) {
+	user, conn, dialect, err := currentUser(ctx)
+	if err != nil {
+		return nil, nil, nil, ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
+	}
+	if user == nil {
+		return nil, nil, nil, ctx.Response().Redirect(nethttp.StatusFound, "/auth/login")
+	}
+	if !user.IsAdmin() {
+		return nil, nil, nil, ctx.Response().String(nethttp.StatusForbidden, "Forbidden")
+	}
+	return user, conn, dialect, nil
+}

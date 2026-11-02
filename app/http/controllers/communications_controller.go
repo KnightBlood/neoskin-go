@@ -57,7 +57,7 @@ func (r *CommunicationsController) Index(ctx goravelhttp.Context) goravelhttp.Re
 
 // CommunicationsPage 处理 GET /admin/communications（历史列表页）。
 func (r *CommunicationsController) CommunicationsPage(ctx goravelhttp.Context) goravelhttp.Response {
-	_, conn, dialect, resp := requireAdmin(ctx)
+	_, conn, dialect, resp := requireAdminPage(ctx)
 	if resp != nil {
 		return resp
 	}

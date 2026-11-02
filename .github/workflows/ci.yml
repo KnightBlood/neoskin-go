@@ -16,6 +16,56 @@ jobs:
       - run: go vet ./...
       - run: go test ./... -count=1
 
+  race-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+      - name: Race detector + coverage
+        run: go test ./... -count=1 -race -covermode=atomic -coverprofile=coverage.out
+      - name: Coverage summary
+        run: go tool cover -func=coverage.out | tail -n 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.out
+          retention-days: 7
+
+  browser-e2e:
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install browser test deps
+        run: npm ci --prefix tests/browser
+      - name: Fetch legacy frontend assets
+        run: |
+          set -euo pipefail
+          curl -sSLo /tmp/bs.zip \
+            "https://github.com/DreamCraft-Tech/blessing-skin-server-patch/releases/download/v6.0.10_patch/blessing-skin-server_6.0.10_patch_php85.zip"
+          echo "bb94f83718f3fca3737a04b2097e747720ebd5966979cf042dbbba5434da3e73  /tmp/bs.zip" | sha256sum -c -
+          unzip -q /tmp/bs.zip -d /tmp/bs
+          mkdir -p public
+          rm -rf public/app
+          cp -r /tmp/bs/public/app public/app
+      - name: Locate Chrome
+        run: |
+          if [ -x /usr/bin/google-chrome ]; then
+            echo "NEOSKIN_CHROME_PATH=/usr/bin/google-chrome" >> "$GITHUB_ENV"
+          fi
+      - name: Browser E2E
+        env:
+          NEOSKIN_BROWSER_E2E: "1"
+        run: go test ./tests/browser -count=1 -v
+
   db-matrix:
     runs-on: ubuntu-latest
     needs: build-test

@@ -38,7 +38,7 @@
 | 用户面板、侧边栏、面包屑、页脚版权 | ✅ |
 | `public/app` 静态资源 | ✅ 部署时复制（`scripts/copy-frontend.ps1`） |
 | WebP / `?png` | ✅ 默认 WebP，PNG 回退 |
-| 浏览器 E2E（首页/登录/用户中心/皮肤库/管理端/编辑器/安装向导） | ✅ 无 console error |
+| 浏览器 E2E（首页/登录/用户中心/皮肤库/管理端/编辑器/安装向导） | ✅ CI（Playwright + 系统 Chrome，零 console error） |
 
 ## 4. patch 功能
 
@@ -71,7 +71,7 @@
 | `go test ./... -count=1` | ✅（含 `tests/e2e`） |
 | GitHub Actions `build-test` | ✅ |
 | GitHub Actions 四库矩阵 | ✅（MySQL/MariaDB/PostgreSQL/SQL Server） |
-| 浏览器 E2E | ✅ 手工（资源就绪后） |
+| 浏览器 E2E | ✅ CI（Playwright + 系统 Chrome；前端产物按 SHA-256 校验下载） |
 
 ## 7. 已知限制
 
@@ -80,7 +80,7 @@
 3. **翻译覆盖**：页面/语言包与业务 API 消息走 YAML + `language_lines` 覆盖；422 校验消息同样取自 `resources/lang/<locale>/validation.yml`（含 `:attribute` 友好名与 `message` 首条错误语义）。
 4. **安装向导**：写入 `.env` 后需重启进程（Goravel 启动时加载配置）。
 5. **`_ignition`**：仅 debug + local/development 启用，`execute-solution` 恒 404（无解决方案注册表）。
-6. **浏览器 E2E 未进 CI**：CI 目前运行服务端 HTTP E2E；浏览器 E2E 需先复制 `public/app`。
+6. **浏览器 E2E 依赖前端产物**：`public/app` 不入库；CI 从上游 6.0.10 发布包下载并按 SHA-256 校验，本地用 `scripts/copy-frontend.ps1`。
 
 ## 8. 复验命令
 

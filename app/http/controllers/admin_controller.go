@@ -55,7 +55,7 @@ func buildAdminMenu(translator *i18n.Translator, current string) []view.MenuItem
 // adminPage 构建管理端页面（admin.base）数据。
 func adminPageData(ctx goravelhttp.Context, titleKey string,
 	extra map[string]any) (*view.UserData, *i18n.Translator, goravelhttp.Response) {
-	admin, conn, dialect, resp := requireAdmin(ctx)
+	admin, conn, dialect, resp := requireAdminPage(ctx)
 	if resp != nil {
 		return nil, nil, resp
 	}
@@ -116,7 +116,7 @@ func renderAdminPage(ctx goravelhttp.Context, name string, data *view.UserData,
 
 // IndexPage 处理 GET /admin：仪表盘。
 func (r *AdminController) IndexPage(ctx goravelhttp.Context) goravelhttp.Response {
-	_, conn, dialect, resp := requireAdmin(ctx)
+	_, conn, dialect, resp := requireAdminPage(ctx)
 	if resp != nil {
 		return resp
 	}
@@ -145,7 +145,10 @@ func (r *AdminController) IndexPage(ctx goravelhttp.Context) goravelhttp.Respons
 
 // UsersPage 处理 GET /admin/users。
 func (r *AdminController) UsersPage(ctx goravelhttp.Context) goravelhttp.Response {
-	admin, _, _, _ := requireAdmin(ctx)
+	admin, _, _, resp := requireAdminPage(ctx)
+	if resp != nil {
+		return resp
+	}
 	data, translator, resp := adminPageData(ctx, "general.user-manage", map[string]any{
 		"currentUser": userToJSON(admin),
 	})

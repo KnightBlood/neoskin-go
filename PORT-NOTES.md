@@ -161,6 +161,20 @@
   调用方用 map 收集错误，按字段名排序取首条——只在多字段同时失败时可能
   选中不同的一条（每条消息内容一致）。`errors` 的 JSON 键顺序在 Go 中由
   `encoding/json` 排序，PHP 为插入顺序（JSON 对象顺序无语义影响）。
+- **后台页面守卫（2026-11-02）**：PHP 后台页面走 `authorize` + `can:admin`
+  中间件；Go 新增 `requireAdminPage`（未登录 302 → `/auth/login`，非管理员
+  403），API/JSON 端点继续用 `requireAdmin`（401 JSON）。修复 `UsersPage`
+  曾忽略守卫响应、游客访问时 nil deref 的问题。
+- **浏览器 E2E 资源（2026-11-02）**：`public/app` 属构建产物不入库。CI 的
+  `browser-e2e` job 下载上游 `v6.0.10_patch` 发布包（SHA-256 固定
+  `bb94f837…`）并只取 `public/app`，本地用 `scripts/copy-frontend.ps1`。
+  浏览器测试用 Playwright（`playwright-core` + 系统 Chrome，不下载
+  Chromium），由 `tests/browser` 的 Go 测试启动服务、播种管理员后执行
+  `flows.mjs`；缺资源/Node 时自动跳过。
+- **CI 质量门禁（2026-11-02）**：`race-coverage` job 用
+  `go test ./... -race -covermode=atomic -coverprofile` 并上传覆盖率
+  artifact；`browser-e2e` job 与 `build-test` 并行依赖。安全 E2E 覆盖
+  CSRF 419、session 轮换、登出失效、remember cookie 篡改、越权 403。
 
 ## 4. 数据库矩阵（已跑通）
 
