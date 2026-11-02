@@ -265,7 +265,8 @@ func (r *SkinlibController) UploadPage(ctx goravelhttp.Context) goravelhttp.Resp
 	}
 	options := service.NewOption(conn, dialect)
 	if options.Bool("require_verification", false) && !user.Verified {
-		return ctx.Response().String(nethttp.StatusForbidden, "You must verify your email first.")
+		// PHP CheckUserVerified：abort(403, trans('auth.check.verified'))。
+		return ctx.Response().String(nethttp.StatusForbidden, t(ctx, "auth.check.verified"))
 	}
 
 	locale := localeMiddleware.LocaleOf(ctx)
@@ -376,7 +377,7 @@ func (r *SkinlibController) Rename(ctx goravelhttp.Context) goravelhttp.Response
 	}
 	name := ctx.Request().Input("name")
 	if name == "" {
-		return validationFailed(ctx, map[string][]string{"name": {"The name field is required."}})
+		return validationFailed(ctx, map[string][]string{"name": {vRequired(ctx, "name")}})
 	}
 	if err := repo.NewTextureRepository(conn, dialect).UpdateName(texture.Tid, name); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
@@ -395,7 +396,7 @@ func (r *SkinlibController) Type(ctx goravelhttp.Context) goravelhttp.Response {
 	textureType := ctx.Request().Input("type")
 	if textureType != "steve" && textureType != "alex" && textureType != "cape" {
 		return validationFailed(ctx, map[string][]string{
-			"type": {"The selected type is invalid."},
+			"type": {vIn(ctx, "type")},
 		})
 	}
 	if err := repo.NewTextureRepository(conn, dialect).UpdateType(texture.Tid, textureType); err != nil {
@@ -457,15 +458,15 @@ func (r *SkinlibController) Upload(ctx goravelhttp.Context) goravelhttp.Response
 	publicValue := ctx.Request().Input("public")
 	errs := map[string][]string{}
 	if name == "" {
-		errs["name"] = []string{"The name field is required."}
+		errs["name"] = []string{vRequired(ctx, "name")}
 	}
 	if textureType != "steve" && textureType != "alex" && textureType != "cape" {
-		errs["type"] = []string{"The selected type is invalid."}
+		errs["type"] = []string{vIn(ctx, "type")}
 	}
 
 	upload, fileErr := ctx.Request().File("file")
 	if fileErr != nil || upload == nil {
-		errs["file"] = []string{"The file field is required."}
+		errs["file"] = []string{vRequired(ctx, "file")}
 	}
 	if len(errs) > 0 {
 		return validationFailed(ctx, errs)
@@ -486,7 +487,7 @@ func (r *SkinlibController) Upload(ctx goravelhttp.Context) goravelhttp.Response
 
 	image, err := png.Decode(bytes.NewReader(data))
 	if err != nil {
-		return validationFailed(ctx, map[string][]string{"file": {"The file must be a PNG image."}})
+		return validationFailed(ctx, map[string][]string{"file": {vMimes(ctx, "file", "png")}})
 	}
 	width := image.Bounds().Dx()
 	height := image.Bounds().Dy()

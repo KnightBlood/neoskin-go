@@ -153,6 +153,14 @@
   `PluginManager` 的 PluginBootFailed/WasEnabled/WasDisabled/WasDeleted；
   `Event::dispatch` 无命中。因此 `UserTryToLogin` 与抽象基类 `Event` 在 PHP
   从不派发，Go 保持不派发即等价，不需要额外接线。
+- **校验消息（2026-11-02）**：422 字段文案来自
+  `resources/lang/<locale>/validation.yml`，`:attribute` 用
+  `validation.attributes` 映射（Laravel `getDisplayableAttribute` 语义）。
+  `message` 按 Laravel `ValidationException::summarize` 取首条字段消息，
+  多错追加 `(and N more error[s])`。偏差：PHP 首条消息按规则声明顺序，Go
+  调用方用 map 收集错误，按字段名排序取首条——只在多字段同时失败时可能
+  选中不同的一条（每条消息内容一致）。`errors` 的 JSON 键顺序在 Go 中由
+  `encoding/json` 排序，PHP 为插入顺序（JSON 对象顺序无语义影响）。
 
 ## 4. 数据库矩阵（已跑通）
 

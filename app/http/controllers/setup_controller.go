@@ -118,19 +118,21 @@ func (r *SetupController) Finish(ctx goravelhttp.Context) goravelhttp.Response {
 	siteName := strings.TrimSpace(ctx.Request().Input("site_name"))
 
 	errs := map[string][]string{}
-	if email == "" || !strings.Contains(email, "@") {
-		errs["email"] = []string{"The email field is required."}
+	if email == "" {
+		errs["email"] = []string{vRequired(ctx, "email")}
+	} else if !strings.Contains(email, "@") {
+		errs["email"] = []string{vEmail(ctx, "email")}
 	}
 	if nickname == "" {
-		errs["nickname"] = []string{"The nickname field is required."}
+		errs["nickname"] = []string{vRequired(ctx, "nickname")}
 	}
-	if len(password) < 8 || len(password) > 32 {
-		errs["password"] = []string{"The password must be between 8 and 32 characters."}
+	if message := vPasswordMessage(ctx, "password", password, 8, 32); message != "" {
+		errs["password"] = []string{message}
 	} else if password != confirmation {
-		errs["password"] = []string{"The password confirmation does not match."}
+		errs["password"] = []string{vConfirmed(ctx, "password")}
 	}
 	if siteName == "" {
-		errs["site_name"] = []string{"The site name field is required."}
+		errs["site_name"] = []string{vRequired(ctx, "site_name")}
 	}
 	if len(errs) > 0 {
 		return validationFailed(ctx, errs)

@@ -31,7 +31,7 @@
 | Phase 4 管理端 | 75% | Users/Players/Closet/Options/Customize/Score/Resource/i18n/Communications/Status/Chart/Plugins/Update |
 | Phase 5 安装向导 | 100% | `/setup` 欢迎页、数据库表单、信息表单、完成页（HTML）+ 建表/管理员/install.lock |
 | Phase 6 模板/页面 | 100% | 首页 + 认证页 + 用户中心 + 皮肤库 + 管理端全部页面（含通信可视化编辑器）+ i18n |
-| Phase 7 插件系统 | 70% | 清单/启停/删除/上传/wget/市场 + Go 原生 Hook/Filter/Event 运行时；PHP 插件代码执行仍不支持 |
+| Phase 7 插件系统 | 75% | 清单/启停/删除/上传/wget/市场 + Go 原生 Hook/Filter/Event 运行时；PHP 插件代码执行仍不支持 |
 | Phase 8 测试/CI | 100% | 单测 + 四库矩阵 + Go HTTP E2E + GitHub Actions 全绿 + 浏览器 E2E；新增 ACCEPTANCE/DEPLOYMENT/verify.ps1 |
 
 ## 3. 已完成的功能
@@ -65,6 +65,34 @@
 ## 5. 变更记录
 
 ### 2026-11-02（本轮）
+
+- **422 校验消息本地化 + Laravel ValidationException 语义**（第 5 项差距）：
+  - 新增 `app/http/controllers/validation.go`：`validationFailed` 的 `message`
+    改为 Laravel `summarize` 语义——首条字段消息，多错追加
+    `(and N more error[s])`（PHP 语言包同样不给该文案翻译）；`errors` 保持
+    字段 => 消息数组。字段顺序按名称排序保证确定性（PHP 为规则声明顺序，
+    仅多字段同时失败时首条可能不同，已记 `PORT-NOTES.md`）。
+  - 新增 `vMsg` + `vRequired/vEmail/vUnique/vIn/vExists/vInteger/vBoolean/
+    vURL/vConfirmed/vMinString/vMaxString/vSizeString/vMimes/vCaptcha/
+    vPasswordMessage` 等辅助：文案全部取自
+    `resources/lang/<locale>/validation.yml`，`:attribute` 使用
+    `validation.attributes` 友好名（未定义时保留原字段名），占位符
+    `:min/:max/:size/:values` 按 Laravel `makeReplacements` 替换。
+  - 20 个控制器中 60+ 处硬编码英文校验消息全部替换；同时按 PHP 规则拆分
+    分支以匹配真实文案：`required|email`（空 → required，格式错 → email）、
+    `required|min|max`（空/过短/过长分别取 required/min.string/max.string）、
+    `confirmed`、`size:32`、`mimes:png`、`max:255` 等。
+  - 角色名校验重写为 PHP `Rules\PlayerName` 四规则（official/cjk/utf8/custom，
+    custom 支持 `/pattern/flags`）并按字符数（mb_strlen 语义）判断 min/max；
+    错误键按端点使用 `name`/`player_name`，规则文案取
+    `user.player.player-name-rule.<rule>`。
+  - `SkinlibController` 未验证邮箱的 403 文案改取 `auth.check.verified`
+    （对齐 PHP `CheckUserVerified`）；`validation.captcha`/`validation.recaptcha`
+    按是否配置 reCAPTCHA secret 选择。
+  - 单测 `validation_test.go`：11 条中英文消息（含 attributes 回退、嵌套规则、
+    占位符）+ 角色名四规则匹配；E2E 新增登录页 CSRF + 空登录请求用例，
+    断言 zh_CN/en 的 422 `message`（含 more-errors 后缀）与字段消息。
+  - 验证：`go build/vet/test ./...` 全绿。
 
 - **插件 Hook 3 方法补齐 + `ConfigureRoutes` 派发**（第 4 项差距）：
   - `internal/plugin/hooks.go`：`Hook` 补 `AddRoute`（存回调）、`ApplyRoutes`
@@ -192,8 +220,7 @@
 
 ## 6. 下一步
 
-1. 422 校验消息本地化（校验层全英文常量 → 按 locale 返回，对齐 PHP translator）。
-2. 浏览器 E2E 进 CI + race / 覆盖率 / 安全用例。
-3. 文档校准（PROGRESS 阶段百分比、ACCEPTANCE.md Hook 7 方法表述等）。
-4. 前端 P0：`NeoSkinFrontend` workspace + `apps/site`(TDesign) / `apps/admin`(antd)
+1. 浏览器 E2E 进 CI + race / 覆盖率 / 安全用例。
+2. 文档校准（PROGRESS 阶段百分比、ACCEPTANCE Hook 7 方法表述等）。
+3. 前端 P0：`NeoSkinFrontend` workspace + `apps/site`(TDesign) / `apps/admin`(antd)
    / `packages/core` / `packages/contract` 骨架（写前端代码前不动后端文档）。

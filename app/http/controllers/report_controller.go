@@ -54,10 +54,10 @@ func (r *ReportController) Submit(ctx goravelhttp.Context) goravelhttp.Response 
 	reason := ctx.Request().Input("reason")
 	errs := map[string][]string{}
 	if tid <= 0 {
-		errs["tid"] = []string{"The tid field is required."}
+		errs["tid"] = []string{vRequired(ctx, "tid")}
 	}
 	if reason == "" {
-		errs["reason"] = []string{"The reason field is required."}
+		errs["reason"] = []string{vRequired(ctx, "reason")}
 	}
 	if len(errs) > 0 {
 		return validationFailed(ctx, errs)
@@ -69,7 +69,7 @@ func (r *ReportController) Submit(ctx goravelhttp.Context) goravelhttp.Response 
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
 	if texture == nil {
-		return validationFailed(ctx, map[string][]string{"tid": {"The selected tid is invalid."}})
+		return validationFailed(ctx, map[string][]string{"tid": {vExists(ctx, "tid")}})
 	}
 
 	reports := repo.NewReportRepository(conn, dialect)
@@ -173,7 +173,7 @@ func (r *ReportController) Review(ctx goravelhttp.Context) goravelhttp.Response 
 	action := ctx.Request().Input("action")
 	if action != "delete" && action != "ban" && action != "reject" {
 		return validationFailed(ctx, map[string][]string{
-			"action": {"The selected action is invalid."},
+			"action": {vIn(ctx, "action")},
 		})
 	}
 

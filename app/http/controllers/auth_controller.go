@@ -45,10 +45,10 @@ func (r *AuthController) Login(ctx goravelhttp.Context) goravelhttp.Response {
 
 	errs := map[string][]string{}
 	if identification == "" {
-		errs["identification"] = []string{"The identification field is required."}
+		errs["identification"] = []string{vRequired(ctx, "identification")}
 	}
 	if password == "" {
-		errs["password"] = []string{"The password field is required."}
+		errs["password"] = []string{vRequired(ctx, "password")}
 	}
 	if len(errs) > 0 {
 		return validationFailed(ctx, errs)
@@ -64,9 +64,10 @@ func (r *AuthController) Login(ctx goravelhttp.Context) goravelhttp.Response {
 	// PHP：同一 IP 登录失败超过 3 次后要求验证码（本地验证码或 reCAPTCHA）。
 	loginFails := captcha.LoginFails().Count(ctx.Request().Ip())
 	if loginFails > captchaRequiredFails {
-		if !verifyCaptcha(ctx, service.NewOption(conn, dialect), ctx.Request().Input("captcha")) {
+		options := service.NewOption(conn, dialect)
+		if !verifyCaptcha(ctx, options, ctx.Request().Input("captcha")) {
 			return validationFailed(ctx, map[string][]string{
-				"captcha": {"The captcha is incorrect."},
+				"captcha": {vCaptcha(ctx, options)},
 			})
 		}
 	}
@@ -222,26 +223,30 @@ func (r *AuthController) Register(ctx goravelhttp.Context) goravelhttp.Response 
 
 	withPlayer := options.Bool("register_with_player_name", true)
 	errs := map[string][]string{}
-	if email == "" || !regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`).MatchString(email) {
-		errs["email"] = []string{"The email field must be a valid email address."}
+	// PHP：'email' => required|email|unique:users（唯一性在下方单独检查）。
+	if email == "" {
+		errs["email"] = []string{vRequired(ctx, "email")}
+	} else if !regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`).MatchString(email) {
+		errs["email"] = []string{vEmail(ctx, "email")}
 	}
-	if len(password) < 8 || len(password) > 32 {
-		errs["password"] = []string{"The password must be between 8 and 32 characters."}
+	// PHP：'password' => required|min:8|max:32。
+	if message := vPasswordMessage(ctx, "password", password, 8, 32); message != "" {
+		errs["password"] = []string{message}
 	}
 
 	if withPlayer {
-		minLength := options.Int("player_name_length_min", 3)
-		maxLength := options.Int("player_name_length_max", 16)
-		if playerName == "" || len(playerName) < minLength || len(playerName) > maxLength ||
-			!regexp.MustCompile(`^[A-Za-z0-9_]+$`).MatchString(playerName) {
-			errs["player_name"] = []string{"The player name is invalid."}
+		if message := validatePlayerName(ctx, options, "player_name", playerName); message != "" {
+			errs["player_name"] = []string{message}
 		}
 	} else if nickname == "" {
-		errs["nickname"] = []string{"The nickname field is required."}
+		errs["nickname"] = []string{vRequired(ctx, "nickname")}
+	} else if len([]rune(nickname)) > 255 {
+		// PHP：'nickname' => required|max:255。
+		errs["nickname"] = []string{vMaxString(ctx, "nickname", "255")}
 	}
 
 	if !verifyCaptcha(ctx, options, captchaInput) {
-		errs["captcha"] = []string{"The captcha is incorrect."}
+		errs["captcha"] = []string{vCaptcha(ctx, options)}
 	}
 
 	if len(errs) > 0 {
@@ -250,7 +255,7 @@ func (r *AuthController) Register(ctx goravelhttp.Context) goravelhttp.Response 
 
 	if count, _ := users.CountByEmail(email); count > 0 {
 		return validationFailed(ctx, map[string][]string{
-			"email": {"The email has already been taken."},
+			"email": {vUnique(ctx, "email")},
 		})
 	}
 	if withPlayer {
@@ -298,12 +303,5 @@ func (r *AuthController) Register(ctx goravelhttp.Context) goravelhttp.Response 
 	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
 		"code": 0, "message": t(ctx, "auth.register.success"),
 		"data": goravelhttp.Json{"uid": uid},
-	})
-}
-
-func validationFailed(ctx goravelhttp.Context, errors map[string][]string) goravelhttp.Response {
-	return ctx.Response().Json(nethttp.StatusUnprocessableEntity, goravelhttp.Json{
-		"message": "The given data was invalid.",
-		"errors":  errors,
 	})
 }

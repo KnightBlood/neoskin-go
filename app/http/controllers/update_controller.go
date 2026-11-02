@@ -244,9 +244,14 @@ func (r *UpdateController) Install(ctx goravelhttp.Context) goravelhttp.Response
 		return resp
 	}
 	id := strings.ToLower(strings.TrimSpace(ctx.Request().Input("id")))
+	if id == "" {
+		return validationFailed(ctx, map[string][]string{
+			"id": {vRequired(ctx, "id")},
+		})
+	}
 	if len(id) != 32 {
 		return validationFailed(ctx, map[string][]string{
-			"id": {"The id field must be 32 characters."},
+			"id": {vSizeString(ctx, "id", "32")},
 		})
 	}
 	session := ctx.Request().Session()

@@ -299,23 +299,23 @@ func buildCommunication(ctx goravelhttp.Context) (repo.CommunicationRow, map[str
 
 	errs := map[string][]string{}
 	if title == "" {
-		errs["title"] = []string{"The title field is required."}
+		errs["title"] = []string{vRequired(ctx, "title")}
 	}
 	if kind != repo.CommunicationAnnouncement && kind != repo.CommunicationMessage &&
 		kind != repo.CommunicationBoth {
-		errs["kind"] = []string{"The selected kind is invalid."}
+		errs["kind"] = []string{vIn(ctx, "kind")}
 	}
 	if editor != "source" && editor != "blocks" {
-		errs["editor"] = []string{"The selected editor is invalid."}
+		errs["editor"] = []string{vIn(ctx, "editor")}
 	}
 	if operation != "draft" && operation != "publish" {
-		errs["operation"] = []string{"The selected operation is invalid."}
+		errs["operation"] = []string{vIn(ctx, "operation")}
 	}
 	if receiver == "" {
 		receiver = "all"
 	}
 	if receiver != "all" && receiver != "normal" && receiver != "uid" && receiver != "email" {
-		errs["receiver"] = []string{"The selected receiver is invalid."}
+		errs["receiver"] = []string{vIn(ctx, "receiver")}
 	}
 
 	status := repo.CommunicationDraft

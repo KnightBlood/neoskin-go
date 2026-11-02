@@ -115,7 +115,7 @@ func (r *PluginController) Upload(ctx goravelhttp.Context) goravelhttp.Response 
 	}
 	upload, err := ctx.Request().File("file")
 	if err != nil || upload == nil {
-		return validationFailed(ctx, map[string][]string{"file": {"The file field is required."}})
+		return validationFailed(ctx, map[string][]string{"file": {vRequired(ctx, "file")}})
 	}
 	manager := plugin.NewManager("", service.NewOption(conn, dialect))
 	if err := manager.ExtractZip(upload.File()); err != nil {
@@ -131,8 +131,11 @@ func (r *PluginController) Wget(ctx goravelhttp.Context) goravelhttp.Response {
 		return resp
 	}
 	url := strings.TrimSpace(ctx.Request().Input("url"))
+	if url == "" {
+		return validationFailed(ctx, map[string][]string{"url": {vRequired(ctx, "url")}})
+	}
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-		return validationFailed(ctx, map[string][]string{"url": {"The url field must be a valid URL."}})
+		return validationFailed(ctx, map[string][]string{"url": {vURL(ctx, "url")}})
 	}
 	file, err := os.CreateTemp("", "neoskin-plugin-*.zip")
 	if err != nil {

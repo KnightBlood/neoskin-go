@@ -150,10 +150,10 @@ func (r *ClosetController) Add(ctx goravelhttp.Context) goravelhttp.Response {
 	if tid <= 0 || name == "" {
 		errs := map[string][]string{}
 		if tid <= 0 {
-			errs["tid"] = []string{"The tid field is required."}
+			errs["tid"] = []string{vRequired(ctx, "tid")}
 		}
 		if name == "" {
-			errs["name"] = []string{"The name field is required."}
+			errs["name"] = []string{vRequired(ctx, "name")}
 		}
 		return validationFailed(ctx, errs)
 	}
@@ -223,7 +223,7 @@ func (r *ClosetController) Rename(ctx goravelhttp.Context) goravelhttp.Response 
 	name := ctx.Request().Input("name")
 	if name == "" {
 		return validationFailed(ctx, map[string][]string{
-			"name": {"The name field is required."},
+			"name": {vRequired(ctx, "name")},
 		})
 	}
 

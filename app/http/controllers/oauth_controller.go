@@ -82,10 +82,10 @@ func (r *OAuthController) StoreClient(ctx goravelhttp.Context) goravelhttp.Respo
 	redirect := strings.TrimSpace(ctx.Request().Input("redirect"))
 	errs := map[string][]string{}
 	if name == "" {
-		errs["name"] = []string{"The name field is required."}
+		errs["name"] = []string{vRequired(ctx, "name")}
 	}
 	if redirect == "" {
-		errs["redirect"] = []string{"The redirect field is required."}
+		errs["redirect"] = []string{vRequired(ctx, "redirect")}
 	}
 	if len(errs) > 0 {
 		return validationFailed(ctx, errs)
@@ -439,9 +439,9 @@ func (r *OAuthController) StorePersonalToken(ctx goravelhttp.Context) goravelhtt
 	name := strings.TrimSpace(ctx.Request().Input("name"))
 	errs := map[string][]string{}
 	if name == "" {
-		errs["name"] = []string{"The name field is required."}
+		errs["name"] = []string{vRequired(ctx, "name")}
 	} else if len([]rune(name)) > 255 {
-		errs["name"] = []string{"The name field must not be greater than 255 characters."}
+		errs["name"] = []string{vMaxString(ctx, "name", "255")}
 	}
 	if len(errs) > 0 {
 		return validationFailed(ctx, errs)
@@ -451,7 +451,7 @@ func (r *OAuthController) StorePersonalToken(ctx goravelhttp.Context) goravelhtt
 	for _, scope := range scopes {
 		if !knownScope(repository, scope) {
 			return validationFailed(ctx, map[string][]string{
-				"scopes": {"The selected scopes is invalid."},
+				"scopes": {vIn(ctx, "scopes")},
 			})
 		}
 	}

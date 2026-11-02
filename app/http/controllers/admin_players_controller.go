@@ -55,7 +55,7 @@ func (r *AdminPlayersController) Name(ctx goravelhttp.Context) goravelhttp.Respo
 	}
 	options := service.NewOption(conn, dialect)
 	name := ctx.Request().Input("player_name")
-	if message := validatePlayerName(options, name); message != "" {
+	if message := validatePlayerName(ctx, options, "player_name", name); message != "" {
 		return validationFailed(ctx, map[string][]string{"player_name": {message}})
 	}
 	players := repo.NewPlayerRepository(conn, dialect)
@@ -78,7 +78,7 @@ func (r *AdminPlayersController) Owner(ctx goravelhttp.Context) goravelhttp.Resp
 	}
 	uid := ctx.Request().InputInt("uid")
 	if uid <= 0 {
-		return validationFailed(ctx, map[string][]string{"uid": {"The uid field is required."}})
+		return validationFailed(ctx, map[string][]string{"uid": {vRequired(ctx, "uid")}})
 	}
 	users := repo.NewUserRepository(conn, dialect)
 	owner, err := users.FindByID(uid)
@@ -107,7 +107,7 @@ func (r *AdminPlayersController) Texture(ctx goravelhttp.Context) goravelhttp.Re
 	tid := ctx.Request().InputInt("tid")
 	textureType := ctx.Request().Input("type")
 	if textureType != "skin" && textureType != "cape" {
-		return validationFailed(ctx, map[string][]string{"type": {"The selected type is invalid."}})
+		return validationFailed(ctx, map[string][]string{"type": {vIn(ctx, "type")}})
 	}
 	if tid > 0 {
 		texture, err := repo.NewTextureRepository(conn, dialect).FindByTid(tid)

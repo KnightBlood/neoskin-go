@@ -58,13 +58,13 @@ func (r *AdminUsersController) Email(ctx goravelhttp.Context) goravelhttp.Respon
 
 	email := ctx.Request().Input("email")
 	if email == "" {
-		return validationFailed(ctx, map[string][]string{"email": {"The email field is required."}})
+		return validationFailed(ctx, map[string][]string{"email": {vRequired(ctx, "email")}})
 	}
 	users := repo.NewUserRepository(conn, dialect)
 	if count, _ := users.CountByEmail(email); count > 0 &&
 		(email != target.Email) {
 		return validationFailed(ctx, map[string][]string{
-			"email": {"The email has already been taken."},
+			"email": {vUnique(ctx, "email")},
 		})
 	}
 	if err := users.UpdateEmail(target.UID, email); err != nil {
@@ -82,7 +82,7 @@ func (r *AdminUsersController) Nickname(ctx goravelhttp.Context) goravelhttp.Res
 	nickname := ctx.Request().Input("nickname")
 	if nickname == "" {
 		return validationFailed(ctx, map[string][]string{
-			"nickname": {"The nickname field is required."},
+			"nickname": {vRequired(ctx, "nickname")},
 		})
 	}
 	if err := repo.NewUserRepository(conn, dialect).UpdateNickname(target.UID, nickname); err != nil {
@@ -98,9 +98,9 @@ func (r *AdminUsersController) Password(ctx goravelhttp.Context) goravelhttp.Res
 		return resp
 	}
 	password := ctx.Request().Input("password")
-	if len(password) < 8 || len(password) > 16 {
+	if message := vPasswordMessage(ctx, "password", password, 8, 16); message != "" {
 		return validationFailed(ctx, map[string][]string{
-			"password": {"The password must be between 8 and 16 characters."},
+			"password": {message},
 		})
 	}
 	hashed, err := php.HashPassword(password, 0)
@@ -123,7 +123,7 @@ func (r *AdminUsersController) Permission(ctx goravelhttp.Context) goravelhttp.R
 	if permission != model.PermissionBanned && permission != model.PermissionNormal &&
 		permission != model.PermissionAdmin {
 		return validationFailed(ctx, map[string][]string{
-			"permission": {"The selected permission is invalid."},
+			"permission": {vIn(ctx, "permission")},
 		})
 	}
 	if permission == model.PermissionAdmin && admin.Permission < model.PermissionSuper {

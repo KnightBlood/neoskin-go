@@ -147,11 +147,18 @@ func (r *NotificationController) Send(ctx goravelhttp.Context) goravelhttp.Respo
 	title := ctx.Request().Input("title")
 	content := ctx.Request().Input("content")
 	errs := map[string][]string{}
-	if receiver != "all" && receiver != "normal" && receiver != "uid" && receiver != "email" {
-		errs["receiver"] = []string{"The selected receiver is invalid."}
+	switch receiver {
+	case "":
+		errs["receiver"] = []string{vRequired(ctx, "receiver")}
+	case "all", "normal", "uid", "email":
+	default:
+		errs["receiver"] = []string{vIn(ctx, "receiver")}
 	}
-	if title == "" || len([]rune(title)) > 20 {
-		errs["title"] = []string{"The title must be between 1 and 20 characters."}
+	// PHP：'title' => required|max:20。
+	if title == "" {
+		errs["title"] = []string{vRequired(ctx, "title")}
+	} else if len([]rune(title)) > 20 {
+		errs["title"] = []string{vMaxString(ctx, "title", "20")}
 	}
 	if len(errs) > 0 {
 		return validationFailed(ctx, errs)

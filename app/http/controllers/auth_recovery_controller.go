@@ -38,11 +38,13 @@ func (r *AuthController) HandleForgot(ctx goravelhttp.Context) goravelhttp.Respo
 	options := service.NewOption(conn, dialect)
 
 	errs := map[string][]string{}
-	if email == "" || !strings.Contains(email, "@") {
-		errs["email"] = []string{"The email field is required."}
+	if email == "" {
+		errs["email"] = []string{vRequired(ctx, "email")}
+	} else if !strings.Contains(email, "@") {
+		errs["email"] = []string{vEmail(ctx, "email")}
 	}
 	if !verifyCaptcha(ctx, options, ctx.Request().Input("captcha")) {
-		errs["captcha"] = []string{"The captcha is incorrect."}
+		errs["captcha"] = []string{vCaptcha(ctx, options)}
 	}
 	if len(errs) > 0 {
 		return validationFailed(ctx, errs)
@@ -121,9 +123,9 @@ func (r *AuthController) HandleReset(ctx goravelhttp.Context) goravelhttp.Respon
 		})
 	}
 	password := ctx.Request().Input("password")
-	if len(password) < 8 || len(password) > 32 {
+	if message := vPasswordMessage(ctx, "password", password, 8, 32); message != "" {
 		return validationFailed(ctx, map[string][]string{
-			"password": {"The password must be between 8 and 32 characters."},
+			"password": {message},
 		})
 	}
 	_, conn, dialect, err := currentUser(ctx)
@@ -178,9 +180,14 @@ func (r *AuthController) HandleVerify(ctx goravelhttp.Context) goravelhttp.Respo
 		})
 	}
 	email := strings.TrimSpace(ctx.Request().Input("email"))
-	if email == "" || !strings.Contains(email, "@") {
+	if email == "" {
 		return validationFailed(ctx, map[string][]string{
-			"email": {"The email field is required."},
+			"email": {vRequired(ctx, "email")},
+		})
+	}
+	if !strings.Contains(email, "@") {
+		return validationFailed(ctx, map[string][]string{
+			"email": {vEmail(ctx, "email")},
 		})
 	}
 	_, conn, dialect, err := currentUser(ctx)
@@ -242,15 +249,20 @@ func (r *AuthController) Bind(ctx goravelhttp.Context) goravelhttp.Response {
 		return ctx.Response().Redirect(nethttp.StatusFound, "/user")
 	}
 	email := strings.TrimSpace(ctx.Request().Input("email"))
-	if email == "" || !strings.Contains(email, "@") {
+	if email == "" {
 		return validationFailed(ctx, map[string][]string{
-			"email": {"The email field is required."},
+			"email": {vRequired(ctx, "email")},
+		})
+	}
+	if !strings.Contains(email, "@") {
+		return validationFailed(ctx, map[string][]string{
+			"email": {vEmail(ctx, "email")},
 		})
 	}
 	users := repo.NewUserRepository(conn, dialect)
 	if count, _ := users.CountByEmail(email); count > 0 {
 		return validationFailed(ctx, map[string][]string{
-			"email": {"The email has already been taken."},
+			"email": {vUnique(ctx, "email")},
 		})
 	}
 	if err := users.UpdateEmail(user.UID, email); err != nil {

@@ -65,13 +65,13 @@ func (r *TranslationsController) Create(ctx goravelhttp.Context) goravelhttp.Res
 	text := ctx.Request().Input("text")
 	errs := map[string][]string{}
 	if group == "" {
-		errs["group"] = []string{"The group field is required."}
+		errs["group"] = []string{vRequired(ctx, "group")}
 	}
 	if key == "" {
-		errs["key"] = []string{"The key field is required."}
+		errs["key"] = []string{vRequired(ctx, "key")}
 	}
 	if text == "" {
-		errs["text"] = []string{"The text field is required."}
+		errs["text"] = []string{vRequired(ctx, "text")}
 	}
 	if len(errs) > 0 {
 		return validationFailed(ctx, errs)
@@ -94,7 +94,7 @@ func (r *TranslationsController) Update(ctx goravelhttp.Context) goravelhttp.Res
 	id := ctx.Request().RouteInt("line")
 	text := ctx.Request().Input("text")
 	if text == "" {
-		return validationFailed(ctx, map[string][]string{"text": {"The text field is required."}})
+		return validationFailed(ctx, map[string][]string{"text": {vRequired(ctx, "text")}})
 	}
 	locale := ctx.Request().Input("lang", "zh_CN")
 	lines := repo.NewLanguageLineRepository(conn, dialect)

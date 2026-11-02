@@ -76,7 +76,7 @@ func (r *UserController) HandleProfile(ctx goravelhttp.Context) goravelhttp.Resp
 		nickname := strings.TrimSpace(ctx.Request().Input("new_nickname"))
 		if nickname == "" {
 			return validationFailed(ctx, map[string][]string{
-				"new_nickname": {"The new nickname field is required."},
+				"new_nickname": {vRequired(ctx, "new_nickname")},
 			})
 		}
 		if err := users.UpdateNickname(user.UID, nickname); err != nil {
@@ -91,10 +91,17 @@ func (r *UserController) HandleProfile(ctx goravelhttp.Context) goravelhttp.Resp
 	case "password":
 		current := ctx.Request().Input("current_password")
 		newPassword := ctx.Request().Input("new_password")
-		if len(current) < 6 || len(current) > 32 || len(newPassword) < 8 || len(newPassword) > 32 {
-			return validationFailed(ctx, map[string][]string{
-				"new_password": {"The password must be between 8 and 32 characters."},
-			})
+		// PHP：current_password => required|min:6|max:32；
+		//      new_password => required|min:8|max:32。
+		errs := map[string][]string{}
+		if message := vPasswordMessage(ctx, "current_password", current, 6, 32); message != "" {
+			errs["current_password"] = []string{message}
+		}
+		if message := vPasswordMessage(ctx, "new_password", newPassword, 8, 32); message != "" {
+			errs["new_password"] = []string{message}
+		}
+		if len(errs) > 0 {
+			return validationFailed(ctx, errs)
 		}
 		if !php.VerifyPassword(user.Password, current) {
 			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
@@ -118,9 +125,15 @@ func (r *UserController) HandleProfile(ctx goravelhttp.Context) goravelhttp.Resp
 	case "email":
 		email := strings.TrimSpace(ctx.Request().Input("email"))
 		password := ctx.Request().Input("password")
-		if email == "" || !strings.Contains(email, "@") {
+		// PHP：'email' => required|email。
+		if email == "" {
 			return validationFailed(ctx, map[string][]string{
-				"email": {"The email field must be a valid email address."},
+				"email": {vRequired(ctx, "email")},
+			})
+		}
+		if !strings.Contains(email, "@") {
+			return validationFailed(ctx, map[string][]string{
+				"email": {vEmail(ctx, "email")},
 			})
 		}
 		if count, _ := users.CountByEmail(email); count > 0 {
@@ -184,7 +197,7 @@ func (r *UserController) SetAvatar(ctx goravelhttp.Context) goravelhttp.Response
 	tid := ctx.Request().InputInt("tid")
 	if tid < 0 {
 		return validationFailed(ctx, map[string][]string{
-			"tid": {"The tid field must be an integer."},
+			"tid": {vInteger(ctx, "tid")},
 		})
 	}
 

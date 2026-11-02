@@ -46,7 +46,7 @@ func (r *IgnitionController) ExecuteSolution(ctx goravelhttp.Context) goravelhtt
 	}
 	if strings.TrimSpace(ctx.Request().Input("solution")) == "" {
 		return validationFailed(ctx, map[string][]string{
-			"solution": {"The solution field is required."},
+			"solution": {vRequired(ctx, "solution")},
 		})
 	}
 	return ctx.Response().Json(http.StatusNotFound, goravelhttp.Json{
@@ -65,17 +65,17 @@ func (r *IgnitionController) UpdateConfig(ctx goravelhttp.Context) goravelhttp.R
 
 	errs := map[string][]string{}
 	if theme == "" {
-		errs["theme"] = []string{"The theme field is required."}
+		errs["theme"] = []string{vRequired(ctx, "theme")}
 	} else if theme != "light" && theme != "dark" && theme != "auto" {
-		errs["theme"] = []string{"The selected theme is invalid."}
+		errs["theme"] = []string{vIn(ctx, "theme")}
 	}
 	if editor == "" {
-		errs["editor"] = []string{"The editor field is required."}
+		errs["editor"] = []string{vRequired(ctx, "editor")}
 	}
 	if hideSolutions == "" {
-		errs["hide_solutions"] = []string{"The hide solutions field is required."}
+		errs["hide_solutions"] = []string{vRequired(ctx, "hide_solutions")}
 	} else if !validBooleanValue(hideSolutions) {
-		errs["hide_solutions"] = []string{"The hide solutions field must be true or false."}
+		errs["hide_solutions"] = []string{vBoolean(ctx, "hide_solutions")}
 	}
 	if len(errs) > 0 {
 		return validationFailed(ctx, errs)

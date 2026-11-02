@@ -1,13 +1,16 @@
 package e2e
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
+	"net/http/cookiejar"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -112,6 +115,94 @@ func TestHTTPEndToEnd(t *testing.T) {
 				t.Fatalf("%s content-type=%q want %q", item.path, contentType, item.contentType)
 			}
 		}
+	}
+
+	assertValidationMessages(t, base)
+}
+
+// assertValidationMessages 验证 422 响应与 Laravel ValidationException 一致：
+// message 为首条字段消息（多错时追加 "(and N more errors)"），字段消息按
+// resources/lang/<locale>/validation.yml + attributes 本地化。
+func assertValidationMessages(t *testing.T, base string) {
+	t.Helper()
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	session := &http.Client{
+		Timeout: 10 * time.Second,
+		Jar:     jar,
+		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	page, err := session.Get(base + "/auth/login")
+	if err != nil {
+		t.Fatalf("GET /auth/login: %v", err)
+	}
+	pageBody, _ := io.ReadAll(page.Body)
+	_ = page.Body.Close()
+	match := regexp.MustCompile(`name="csrf-token" content="([^"]+)"`).FindStringSubmatch(string(pageBody))
+	if len(match) != 2 {
+		t.Fatal("csrf token not found on login page")
+	}
+	token := match[1]
+
+	cases := []struct {
+		name        string
+		query       string
+		message     string
+		fieldErrors string
+	}{
+		{
+			name:  "zh_CN",
+			query: "?lang=zh_CN",
+			// PHP ValidationException::summarize：首条消息 + "(and 1 more error)"。
+			message:     "邮箱或角色名 不能为空。 (and 1 more error)",
+			fieldErrors: "邮箱或角色名 不能为空。",
+		},
+		{
+			name:        "en",
+			query:       "?lang=en",
+			message:     "The email or player name field is required. (and 1 more error)",
+			fieldErrors: "The email or player name field is required.",
+		},
+	}
+	for _, item := range cases {
+		t.Run("validation_"+item.name, func(t *testing.T) {
+			request, err := http.NewRequest(http.MethodPost, base+"/auth/login"+item.query,
+				strings.NewReader("{}"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			request.Header.Set("Content-Type", "application/json")
+			request.Header.Set("Accept", "application/json")
+			request.Header.Set("X-CSRF-TOKEN", token)
+			response, err := session.Do(request)
+			if err != nil {
+				t.Fatal(err)
+			}
+			body, _ := io.ReadAll(response.Body)
+			_ = response.Body.Close()
+			if response.StatusCode != http.StatusUnprocessableEntity {
+				t.Fatalf("status=%d body=%s", response.StatusCode, body)
+			}
+			var payload struct {
+				Message string              `json:"message"`
+				Errors  map[string][]string `json:"errors"`
+			}
+			if err := json.Unmarshal(body, &payload); err != nil {
+				t.Fatalf("decode: %v body=%s", err, body)
+			}
+			if payload.Message != item.message {
+				t.Fatalf("message=%q want=%q", payload.Message, item.message)
+			}
+			messages := payload.Errors["identification"]
+			if len(messages) == 0 || messages[0] != item.fieldErrors {
+				t.Fatalf("errors.identification=%v want=%q", messages, item.fieldErrors)
+			}
+		})
 	}
 }
 
