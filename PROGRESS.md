@@ -66,6 +66,22 @@
 
 ### 2026-11-02（本轮）
 
+- **限流对齐 PHP 路由 `throttle:N,1`**（第 3 项差距）：
+  - 新增 `app/http/middleware/throttle.go`：复刻 Laravel `ThrottleRequests` +
+    `Illuminate\Cache\RateLimiter` —— 签名 `sha1(method|path|ip)`、Goravel Cache
+    固定窗口（`:timer` 存过期时间戳 + 计数 `*int64`，因 memory 驱动 Increment
+    只支持指针类型）、`tooManyAttempts/hit/availableIn` 语义与 PHP 一致；
+    超限返回 429 + `Retry-After` + `X-RateLimit-{Limit,Remaining,Reset}`、
+    响应体 `Too Many Attempts.`，成功响应同样带 `X-RateLimit-*` 头。
+  - 路由接入：`POST /admin/communications/preview`（90/min）、
+    `/admin/communications/import`（30/min）、`/admin/update/upload`（6/min）、
+    `/admin/update/install`（3/min）——与 `routes/web.php` 第 129/130/209/210 行一致。
+  - 另补 PHP RouteServiceProvider 的 api 组全局 `throttle:60,1`：
+    `APIThrottle(60)` 挂在 web 组链上（仅 `/api` 前缀生效，`APP_ENV=testing` 跳过）。
+  - 单测 `throttle_test.go`（固定窗口计数、窗口过期重置、签名独立、指针计数回填）；
+    手工 HTTP：install 第 4 次 429（Rem 2→1→0，RA=60）、import 30/min 计数正常、
+    api 60/min 连续 63 次 → 恰好 3 个 429、非 api 页面不受影响。
+
 - **remember me「记住我」对齐 PHP `Auth::login($user, $keep)`**：
   - `auth.Login(ctx, users, uid, remember)`：登录即 `session.Regenerate(true)` 轮换
     session ID（消除 session fixation TODO），再调 `session.WriteCookie` 重写 cookie

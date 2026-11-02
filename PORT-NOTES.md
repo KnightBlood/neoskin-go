@@ -134,6 +134,11 @@
   `retrieveByToken(id, token)`；第三段密码 HMAC 对应 PHP
   `hashPasswordForCookie` 的 `hash_equals`（改密后旧 cookie 立即失效）；
   `logout()` 轮换 remember_token（`cycleRememberToken`）并下发过期 cookie。
+- **限流（2026-11-02）**：Laravel 的 `throttle:N,1` 走 `Illuminate\Cache\RateLimiter`
+  于 Cache 的固定窗口；Go 在 `app/http/middleware/throttle.go` 自实现同语义
+  （签名 sha1(method|path|ip)；Goravel memory cache 的 Increment 只认 `*int64`
+  指针，计数基值/回填均存指针）。api 组生产环境全局 `throttle:60,1`
+  （`APIThrottle`，testing 跳过）由 RouteServiceProvider 确认移植。
 
 ## 4. 数据库矩阵（已跑通）
 

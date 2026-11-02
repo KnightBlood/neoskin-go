@@ -49,6 +49,8 @@ func Web() {
 		oauthmw.NormalizeJSONContentType(),
 		// Laravel 的 api 中间件组不校验 CSRF；第三方以 Bearer token 调用 /api/* 时同样不带 CSRF。
 		httpmiddleware.VerifyCsrfToken([]string{"api", "api/*"}),
+		// RouteServiceProvider：api 中间件组在生产环境带 throttle:60,1（testing 跳过）。
+		oauthmw.APIThrottle(60),
 	)
 	web.Group(func(router route.Router) {
 		router.Get("/", homeController.Index)
@@ -184,8 +186,9 @@ func Web() {
 		router.Delete("/admin/i18n/:line", translationsController.Delete)
 		router.Get("/admin/communications", communicationsController.CommunicationsPage)
 		router.Post("/admin/communications", communicationsController.Store)
-		router.Post("/admin/communications/preview", communicationsController.Preview)
-		router.Post("/admin/communications/import", communicationsController.Import)
+		// Laravel 路由：throttle:90,1 / throttle:30,1。
+		router.Middleware(oauthmw.Throttle(90, 60)).Post("/admin/communications/preview", communicationsController.Preview)
+		router.Middleware(oauthmw.Throttle(30, 60)).Post("/admin/communications/import", communicationsController.Import)
 		router.Put("/admin/communications/:communication", communicationsController.Update)
 		router.Post("/admin/communications/update/:communication", communicationsController.Update)
 		router.Post("/admin/communications/:communication/withdraw", communicationsController.Withdraw)
@@ -208,8 +211,9 @@ func Web() {
 		router.Post("/admin/plugins/market/download", marketController.Download)
 		router.Get("/admin/update", updateController.UpdatePage)
 		router.Post("/admin/update/download", updateController.Download)
-		router.Post("/admin/update/upload", updateController.Upload)
-		router.Post("/admin/update/install", updateController.Install)
+		// Laravel 路由：throttle:6,1 / throttle:3,1。
+		router.Middleware(oauthmw.Throttle(6, 60)).Post("/admin/update/upload", updateController.Upload)
+		router.Middleware(oauthmw.Throttle(3, 60)).Post("/admin/update/install", updateController.Install)
 		router.Get("/user", userController.Index)
 		router.Post("/admin/notifications/send", notificationController.Send)
 		router.Middleware(oauthmw.RequireScopes("Notification.ReadWrite")).Post("/api/admin/notifications", notificationController.Send)
