@@ -1,6 +1,6 @@
 # 验收清单（NeoSkinGo）
 
-> 对照 `AGENTS.md` / `MIGRATION.md` 的硬约束。最后更新：2026-11-01。
+> 对照 `AGENTS.md` / `MIGRATION.md` 的硬约束。最后更新：2026-11-02。
 
 ## 1. HTTP 契约
 
@@ -38,7 +38,7 @@
 | 用户面板、侧边栏、面包屑、页脚版权 | ✅ |
 | `public/app` 静态资源 | ✅ 部署时复制（`scripts/copy-frontend.ps1`） |
 | WebP / `?png` | ✅ 默认 WebP，PNG 回退 |
-| 浏览器 E2E（首页/登录/用户中心/皮肤库/管理端/编辑器/安装向导） | ✅ CI（Playwright + 系统 Chrome，零 console error） |
+| 浏览器 E2E（首页/登录/用户中心/皮肤库/上传页/管理端） | ✅ CI（Playwright + 系统 Chrome，零 console error） |
 
 ## 4. patch 功能
 
@@ -59,7 +59,7 @@
 | 清单扫描 / 启停 / 删除 / 上传 / wget / 市场 | ✅ |
 | Hook 7 方法语义（菜单/路由/样式/脚本/徽章/通知/中间件） | ✅ Go 原生 API |
 | Filter（add/apply/remove/priority） | ✅ |
-| 24 个事件 + Dispatcher | ✅（21 个已接入业务派发点） |
+| 24 个事件 + Dispatcher | ✅ 24 个常量；PHP 原生 5 个派发点（ConfigureRoutes + 4 个插件生命周期）已对齐，另派发业务事件供 Go 插件监听 |
 | PHP 插件代码执行 | ❌ 不支持（Go 无法执行 PHP；与 .NET AOT 策略一致） |
 
 ## 6. 测试与 CI
@@ -69,6 +69,8 @@
 | `go build ./...` | ✅ |
 | `go vet ./...` | ✅ |
 | `go test ./... -count=1` | ✅（含 `tests/e2e`） |
+| `go test ./... -race` + 覆盖率 | ✅ CI `race-coverage`（coverage artifact） |
+| 安全用例（CSRF/session 轮换/remember 篡改/越权） | ✅ `tests/e2e/security_test.go` |
 | GitHub Actions `build-test` | ✅ |
 | GitHub Actions 四库矩阵 | ✅（MySQL/MariaDB/PostgreSQL/SQL Server） |
 | 浏览器 E2E | ✅ CI（Playwright + 系统 Chrome；前端产物按 SHA-256 校验下载） |
@@ -89,5 +91,7 @@ go build ./...
 go vet ./...
 go test ./... -count=1
 powershell -ExecutionPolicy Bypass -File scripts\copy-frontend.ps1
+npm install --prefix tests\browser
+$env:NEOSKIN_BROWSER_E2E='1'; go test ./tests\browser -v -count=1
 go test ./tests/e2e -v -count=1
 ```

@@ -364,6 +364,9 @@ WebP 编码器（纯 Go 或 cgo 方案，需在 `go.mod` 记录选型）。需�
 
 ## 12. 分阶段实施计划
 
+> 说明：以下是迁移初期的计划清单，保留作路径记录；实际完成情况与百分比以
+> `PROGRESS.md` 为准（部分条目已超出最初范围，例如浏览器 E2E、race/覆盖率）。
+
 ### Phase 0：项目骨架（1-2 天）
 - [x] 初始化 Go module + Goravel 项目
 - [x] 配置数据库连接（SQLite / MySQL / MariaDB / PostgreSQL / SQL Server）
@@ -386,49 +389,54 @@ WebP 编码器（纯 Go 或 cgo 方案，需在 `go.mod` 记录选型）。需�
 ### Phase 2：认证与授权（3-5 天，进行中）
 - [~] Session 认证 + Cookie（Goravel session/CSRF；PHP session cookie 加密未做，签名 URL/laravel_token 已兼容）
 - [x] OAuth2 Server（Passport 兼容：authorize/token/clients/scopes/tokens/personal token/refresh + Bearer/scope）
-- [~] 中间件链（session + CSRF + OAuth scope；auth/role 在控制器内校验）
+- [x] 中间件链（session + CSRF + OAuth scope + 限流；auth/role 在控制器内校验）
 - [x] Scope 机制
 
 ### Phase 3：核心业务控制器（7-10 天）
 - [x] AuthController（登录/注册/验证码/找回/重置/验证/绑定）
 - [x] UserController（档案/头像/积分/签到/深色模式/重发验证邮件）
-- [~] PlayerController（CRUD/改名/纹理设置已完成；页面模板待做）
-- [~] ClosetController（分页/IDs/add/rename/remove 已完成；页面模板待做）
-- [~] TextureController（上传/类型/隐私/删除/raw/avatar/preview 已完成；webp 输出未做）
-- [~] SkinlibController（浏览/详情/改名/隐私/类型/删除/上传已完成；举报待做）
-- [~] ReportController（提交/我的举报/管理列表/review 已完成；管理端页面与富查询待做）
+- [x] PlayerController（CRUD/改名/纹理设置 + 页面）
+- [x] ClosetController（分页/IDs/add/rename/remove + 页面）
+- [x] TextureController（上传/类型/隐私/删除/raw/avatar/preview；WebP 默认输出）
+- [x] SkinlibController（浏览/详情/改名/隐私/类型/删除/上传/举报）
+- [x] ReportController（提交/我的举报/管理列表/review + 页面）
 - [x] ClosetManagementController / PlayersManagementController / UsersManagementController
 
 ### Phase 4：管理面板（5-7 天）
 - [x] AdminController（仪表盘/图表/状态）
-- [~] CommunicationsController（CRUD/预览/导入/撤回/投递已完成；编辑器页面待做）
+- [x] CommunicationsController（CRUD/预览/导入/撤回/投递 + 编辑器页面）
 - [x] NotificationsController（站内信列表/详情/已读/发送）
-- [~] OptionsController（选项保存/读取已完成；表单页面模板待做）
-- [~] TranslationsController（列表/新增/修改/删除已完成；页面模板待做）
-- [~] PluginController（清单/启停/删除/readme/upload/wget 已完成；市场与原生运行时待做）
+- [x] OptionsController（选项保存/读取 + 表单页面）
+- [x] TranslationsController（列表/新增/修改/删除 + 页面）
+- [x] PluginController（清单/启停/删除/readme/upload/wget + 页面）
 - [x] UpdateController（ZIP 校验/暂存/备份/回滚/安装）
-- [~] MarketController（列表/安装已完成；市场页面模板待做）
+- [x] MarketController（列表/安装 + 市场页面）
 
 ### Phase 5：安装向导 + 设置（2-3 天）
 - [x] SetupController（数据库/信息/完成）
 - [~] CheckInstallation 中间件（setup 路由内联检查 install.lock；全局重定向未启用）
 
 ### Phase 6：前端视图（5-7 天）
-- [~] 104 个 `.twig`（86 个入口模板/片段）→ Go template 转换（首页 + 布局/共享片段已完成）
-- [ ] 静态资源服务
-- [ ] webpack 构建集成
+- [x] Twig → Go template 转换（首页/认证/用户中心/皮肤库/管理端全部页面 + 布局/共享片段）
+- [x] 静态资源服务（`/app/*` 扫描 `public/app` 哈希文件名）
+- [x] 前端产物接入（构建沿用源仓库，产物不入库；`scripts/copy-frontend.ps1`）
 
 ### Phase 7：插件系统（5-7 天）
-- [ ] 插件 manifest 解析
-- [ ] Hook 事件总线
-- [ ] 插件管理（启用/禁用/删除/上传）
-- [ ] 插件市场下载
+- [x] 插件 manifest 解析
+- [x] Hook 事件总线（7 方法：菜单/路由/样式/脚本/徽章/通知/中间件）
+- [x] 插件管理（启用/禁用/删除/上传）
+- [x] 插件市场下载
+- [ ] 插件市场缓存/分页（待补）
+- [ ] PHP 插件代码执行（设计上不支持，需改写为 Go 扩展）
 
 ### Phase 8：测试与验证（3-5 天）
-- [ ] 67 个测试用例移植
-- [ ] HTTP 接口契约测试（路径/参数/响应）
-- [ ] 数据兼容性测试（存量数据读取）
+- [x] HTTP 接口契约测试（路径/参数/响应）
+- [x] 数据兼容性测试（存量数据读取）
+- [x] 安全用例（CSRF/session 轮换/remember 篡改/越权）
+- [x] 浏览器 E2E（Playwright + 系统 Chrome，CI）
+- [x] race detector + 覆盖率 artifact（CI）
 - [ ] 性能压测
+- [ ] 67 个测试用例逐一移植（当前以端到端覆盖为主）
 
 ---
 

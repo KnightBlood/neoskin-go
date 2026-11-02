@@ -24,14 +24,14 @@
 | 阶段 | 进度 | 说明 |
 | --- | --- | --- |
 | Phase 0 骨架 | 100% | Goravel v1.18、config、routes、health |
-| Phase 0.5 数据库矩阵 | 95% | 17 表安装器、四库矩阵；CI 矩阵待补 |
+| Phase 0.5 数据库矩阵 | 100% | 17 表安装器、四库矩阵（本地 + CI 常态） |
 | Phase 1 数据层/模型 | 80% | 全部业务表 + OAuth + Option；更新包元数据走文件系统 |
 | Phase 2 认证/授权 | 100% | 登录/注册/验证码/登出、OAuth2 全端点、Bearer + scope、找回/重置/验证/绑定、`NEOSKIN_APP_KEY` 签名 URL、locale 检测 |
 | Phase 3 业务控制器 | 100% | Auth/User/Player/Closet/Texture/Skinlib/Report + avatar/preview 渲染 |
-| Phase 4 管理端 | 75% | Users/Players/Closet/Options/Customize/Score/Resource/i18n/Communications/Status/Chart/Plugins/Update |
+| Phase 4 管理端 | 90% | 全部页面与 API 已接通（Users/Players/Closet/Options/Customize/Score/Resource/i18n/Communications/Status/Chart/Plugins/Update）；剩余交互细节对齐 |
 | Phase 5 安装向导 | 100% | `/setup` 欢迎页、数据库表单、信息表单、完成页（HTML）+ 建表/管理员/install.lock |
 | Phase 6 模板/页面 | 100% | 首页 + 认证页 + 用户中心 + 皮肤库 + 管理端全部页面（含通信可视化编辑器）+ i18n |
-| Phase 7 插件系统 | 75% | 清单/启停/删除/上传/wget/市场 + Go 原生 Hook/Filter/Event 运行时；PHP 插件代码执行仍不支持 |
+| Phase 7 插件系统 | 80% | 清单/启停/删除/上传/wget/市场 + Go 原生 Hook 7 方法/Filter/24 事件；插件市场缓存与 PHP 插件代码执行未支持 |
 | Phase 8 测试/CI | 100% | 单测 + 四库矩阵 + Go HTTP E2E + race/覆盖率 + 浏览器 E2E + 安全用例 + GitHub Actions 全绿；新增 ACCEPTANCE/DEPLOYMENT/verify.ps1 |
 
 ## 3. 已完成的功能
@@ -65,6 +65,16 @@
 ## 5. 变更记录
 
 ### 2026-11-02（本轮）
+
+- **文档校准**：
+  - `ACCEPTANCE.md`：插件事件口径改为「24 个常量 + PHP 原生 5 个派发点已
+    对齐，另派发业务事件供 Go 插件监听」；Hook 7 方法标注为已完成；新增
+    race/覆盖率与安全用例行；浏览器 E2E 覆盖范围按实际用例校准。
+  - `PROGRESS.md`：数据库矩阵 100%（CI 常态）、管理端 90%、插件系统 80%；
+    下一步收敛为文档校准后的前端 P0。
+  - `MIGRATION.md`：分阶段清单加「以 PROGRESS 为准」说明；Phase 3/4/6/7/8
+    勾选与现状对齐（页面、WebP、插件 Hook/市场、E2E/安全/race）。
+  - `PORT-NOTES.md`：补充后台页面守卫、浏览器 E2E 资源策略、CI 门禁。
 
 - **CI 安全/质量门禁 + 浏览器 E2E + 后台页面守卫**（第 6 项差距）：
   - 新增 `tests/support`：抽出 E2E 共用的「构建 → 建表 → 启动 → 健康检查 →
