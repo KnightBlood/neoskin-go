@@ -8,7 +8,7 @@
 
 - **目标**：将 `blessing-skin-server-Laravel13`（6.0.11_patch）完整迁移到 Go 1.26 + Goravel v1.18。
 - **基线**：`D:\WORKspace\NeoSkin\blessing-skin-server-Laravel13`（只读参考，禁止修改）。
-- **当前版本**：迁移进行中（当前只有迁移文档，尚无 Go 代码）。
+- **当前版本**：迁移主体已完成；仓库已包含完整 Go 代码、测试与 CI。实际进度、剩余项与已知限制以 `PROGRESS.md` / `ACCEPTANCE.md` 为准。
 
 ## 2. 硬约束（不可破坏）
 

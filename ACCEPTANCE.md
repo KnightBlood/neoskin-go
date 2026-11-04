@@ -1,12 +1,12 @@
 # 验收清单（NeoSkinGo）
 
-> 对照 `AGENTS.md` / `MIGRATION.md` 的硬约束。最后更新：2026-11-02。
+> 对照 `AGENTS.md` / `MIGRATION.md` 的硬约束。最后更新：2026-11-04。
 
 ## 1. HTTP 契约
 
 | 项目 | 目标 | 状态 |
 | --- | --- | --- |
-| PHP 实际路由 | 174 条 | ✅ 183 条 Go 注册（含辅助路由） |
+| PHP 实际路由 | 174 条 | ✅ 唯一路径 145/145；179 条 Go 注册（含辅助路由，方法级说明见下） |
 | 唯一路径覆盖 | 145/145 | ✅ 100% |
 | 路由分组 | admin / api / user / oauth / auth / skinlib / texture / avatar / preview / raw / setup / csl / `.well-known` / `_ignition` | ✅ 全部注册 |
 | 响应 JSON 结构 | 与 PHP `json()` 一致（`code/message/data`） | ✅ 关键路径 |
@@ -16,6 +16,13 @@
 | Bearer 鉴权 | `/api/*` scope 校验 | ✅ session 视为 `*` |
 | 签名 URL / laravel_token | 与 PHP `hash_hmac` 兼容 | ✅（需 `NEOSKIN_APP_KEY`） |
 
+> 方法级说明：`GET /{player}.json` 与 `GET /csl/{player}.json` 共用 catch-all；
+> `POST /skinlib` 已作为 `POST /texture` 的同处理器别名注册；PHP `Route::any`
+> 路径（`/api`、`/setup/database`、`/auth/captcha`、`/admin/customize|options|
+> score|resource`、`/admin/plugins/config/{name}`、`/.well-known/change-password`）
+> 已改为 Goravel `Any`。唯一例外是 `QUERY` 方法：Goravel 未注册该非标准 HTTP
+> 方法，其余 GET/POST/PUT/PATCH/DELETE/OPTIONS 均覆盖。
+
 ## 2. 数据兼容
 
 | 项目 | 状态 |
@@ -24,7 +31,7 @@
 | 表名/字段/主键（`uid`/`pid`/`tid`） | ✅ 对齐 PHP migrations |
 | bcrypt `$2y$` 密码 | ✅ 可验证 |
 | 纹理 SHA-256 hash | ✅ |
-| 四库矩阵（MySQL/MariaDB/PostgreSQL/SQL Server） | ✅ 本地 + GitHub Actions |
+| 四库矩阵（MySQL/MariaDB/PostgreSQL/SQL Server） | ✅ 本机 2026-11-01：MySQL/MariaDB/PostgreSQL + WiltonDB（SQL Server 协议）；CI `db-matrix` 用真 SQL Server |
 | 存量数据读取 | ✅ 只增不改，不做自动改写 |
 
 ## 3. 前端契约
@@ -72,7 +79,7 @@
 | `go test ./... -race` + 覆盖率 | ✅ CI `race-coverage`（coverage artifact） |
 | 安全用例（CSRF/session 轮换/remember 篡改/越权） | ✅ `tests/e2e/security_test.go` |
 | GitHub Actions `build-test` | ✅ |
-| GitHub Actions 四库矩阵 | ✅（MySQL/MariaDB/PostgreSQL/SQL Server） |
+| GitHub Actions 四库矩阵 | ✅ `db-matrix`（真 MySQL/MariaDB/PostgreSQL/SQL Server） |
 | 浏览器 E2E | ✅ CI（Playwright + 系统 Chrome；前端产物按 SHA-256 校验下载） |
 
 ## 7. 已知限制

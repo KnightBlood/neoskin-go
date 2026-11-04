@@ -95,8 +95,7 @@ go test ./internal/db -run TestMatrix -v
 
 ## 5. CI
 
-Go 端 CI 参考 `.NET` 仓库的 `.github/workflows/ci.yml`（5 数据库 + 发布）与
-Java 的 `NeoSkinSpringBoot/.github/workflows/ci.yml`：
+Go 仓库的 `.github/workflows/ci.yml` 已包含 `db-matrix` job：
 
 - 镜像：`mysql:8` / `mariadb:11` / `postgres:16` /
   `mcr.microsoft.com/mssql/server:2022-latest`；

@@ -377,7 +377,7 @@ WebP 编码器（纯 Go 或 cgo 方案，需在 `go.mod` 记录选型）。需�
 - [x] 五方言的建表/分页/自增/布尔/时间戳实现
 - [x] 环境变量门控的 `DatabaseMatrixTest`（建表 + 用户/纹理 CRUD）
 - [x] 本机 `tools\scripts\db.cmd` 四种真实库全部通过
-- [~] CI 五库矩阵（GitHub Actions 四库 + SQLite；等待首次远端运行）
+- [x] CI 五库矩阵（GitHub Actions 四库 + SQLite；见 `.github/workflows/ci.yml`）
 - [x] 记录踩坑到 `DB-MATRIX.md` / `PORT-NOTES.md`
 
 ### Phase 1：数据层 + 模型（3-5 天）
@@ -386,8 +386,8 @@ WebP 编码器（纯 Go 或 cgo 方案，需在 `go.mod` 记录选型）。需�
 - [x] 纹理 hash 算法确认与实现
 - [x] 单元测试：CRUD + 关联查询（SQLite + 四库矩阵）
 
-### Phase 2：认证与授权（3-5 天，进行中）
-- [~] Session 认证 + Cookie（Goravel session/CSRF；PHP session cookie 加密未做，签名 URL/laravel_token 已兼容）
+### Phase 2：认证与授权（3-5 天）
+- [x] Session 认证 + Cookie（Goravel session/CSRF；PHP session cookie 加密未做，签名 URL/laravel_token 已兼容）
 - [x] OAuth2 Server（Passport 兼容：authorize/token/clients/scopes/tokens/personal token/refresh + Bearer/scope）
 - [x] 中间件链（session + CSRF + OAuth scope + 限流；auth/role 在控制器内校验）
 - [x] Scope 机制
@@ -414,7 +414,7 @@ WebP 编码器（纯 Go 或 cgo 方案，需在 `go.mod` 记录选型）。需�
 
 ### Phase 5：安装向导 + 设置（2-3 天）
 - [x] SetupController（数据库/信息/完成）
-- [~] CheckInstallation 中间件（setup 路由内联检查 install.lock；全局重定向未启用）
+- [~] CheckInstallation 中间件（setup 路由内联检查 install.lock；全局 RedirectToSetup 未启用，已登记为已知差异）
 
 ### Phase 6：前端视图（5-7 天）
 - [x] Twig → Go template 转换（首页/认证/用户中心/皮肤库/管理端全部页面 + 布局/共享片段）
@@ -436,7 +436,7 @@ WebP 编码器（纯 Go 或 cgo 方案，需在 `go.mod` 记录选型）。需�
 - [x] 浏览器 E2E（Playwright + 系统 Chrome，CI）
 - [x] race detector + 覆盖率 artifact（CI）
 - [ ] 性能压测
-- [ ] 67 个测试用例逐一移植（当前以端到端覆盖为主）
+- [ ] 67 个测试用例逐一移植（当前为单测 + E2E 覆盖，未逐条对照）
 
 ---
 

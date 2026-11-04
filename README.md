@@ -4,14 +4,11 @@
 
 Go / Goravel 实现的 Minecraft 皮肤托管平台后端，迁移自 `blessing-skin-server-Laravel13`（6.0.11_patch）。
 
-> **当前状态：Phase 0 / 0.5 完成，Phase 1/2 进行中。**
-> 已完成 Goravel 骨架、五库连接、17 张表安装器与矩阵；PHP 兼容层（bcrypt `$2y$`、
-> SHA-256、时间格式）；用户/玩家/纹理仓储；Minecraft `{player}.json`、
-> `/csl/{player}.json`、`/textures/{hash}`、`/csl/textures/{hash}`；
-> 登录/登出/注册/验证码/`/api/user`（Goravel session + CSRF + options）；
-> 用户资料/头像/积分/签到/深色模式；玩家管理；衣柜分页/收藏/改名/移除；
-> 皮肤库浏览/管理/上传；举报提交与审核。
-> 找回密码、OAuth2、管理端其余页面、模板仍待移植。
+> **当前状态：迁移主体完成（2026-11-04 校准）。**
+> Phase 0–6 完成；Phase 7 插件系统 80%（Go 原生 Hook/Filter/Event，PHP 插件代码不可执行）；
+> Phase 8 以本地 `go build/vet/test` 与 CI workflow 为准。已实现认证/找回/邮箱验证、
+> OAuth2、用户中心、皮肤库、管理端全部页面、安装向导、在线更新与四库矩阵。
+> 具体百分比与剩余项以 [PROGRESS.md](./PROGRESS.md)、[ACCEPTANCE.md](./ACCEPTANCE.md) 为准。
 
 ## 技术栈
 
@@ -33,7 +30,7 @@ NeoSkinGo/
 ├── app/facades/             # Goravel facade
 ├── config/                  # app/database/http/session...
 ├── routes/                  # web.go / grpc.go
-├── resources/views/         # Go template（待移植 86 个入口）
+├── resources/views/         # Go template（页面模板已迁移）
 ├── public/                  # 静态资源（app/ 由 PHP 源项目复制）
 ├── storage/                 # textures / uploads
 ├── tests/                   # feature 测试

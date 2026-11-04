@@ -1,7 +1,7 @@
 # NeoSkinGo — 进度快照
 
 > 每次会话结束更新本文件，并在回复末尾给出「进度」一行。
-> 最后更新：2026-11-02。
+> 最后更新：2026-11-04。
 > 仓库：<https://github.com/KnightBlood/neoskin-go>
 
 ## 1. 总览
@@ -10,11 +10,11 @@
 | --- | --- |
 | 路由条目（PHP 实际） | **174** |
 | 唯一路径 | **145** |
-| 已接通的源路径 | **145（100%）** |
+| 已接通的源路径 | **145/145 唯一路径**；方法级以 `ACCEPTANCE.md` 说明为准（仅 `QUERY` 非标准方法未注册） |
 | 未接通唯一路径 | **0** |
 | Go 代码规模 | `internal/` + `app/controllers` 约 50 个文件 |
 | 测试 | `go build ./...` / `go vet ./...` / `go test ./...` 全绿 |
-| 数据库矩阵 | SQLite + MySQL/MariaDB/PostgreSQL/WiltonDB 通过 |
+| 数据库矩阵 | SQLite + MySQL/MariaDB/PostgreSQL/WiltonDB；本机 2026-11-01 实测，CI `db-matrix` job 常备 |
 
 > 说明：`/{player}.json`、`/csl/{player}.json` 由同一个 `/:player` handler 处理，
 > 已按功能计入覆盖。
@@ -29,10 +29,10 @@
 | Phase 2 认证/授权 | 100% | 登录/注册/验证码/登出、OAuth2 全端点、Bearer + scope、找回/重置/验证/绑定、`NEOSKIN_APP_KEY` 签名 URL、locale 检测 |
 | Phase 3 业务控制器 | 100% | Auth/User/Player/Closet/Texture/Skinlib/Report + avatar/preview 渲染 |
 | Phase 4 管理端 | 90% | 全部页面与 API 已接通（Users/Players/Closet/Options/Customize/Score/Resource/i18n/Communications/Status/Chart/Plugins/Update）；剩余交互细节对齐 |
-| Phase 5 安装向导 | 100% | `/setup` 欢迎页、数据库表单、信息表单、完成页（HTML）+ 建表/管理员/install.lock |
+| Phase 5 安装向导 | 90% | `/setup` 欢迎页、数据库表单、信息表单、完成页（HTML）+ 建表/管理员/install.lock；全局 `RedirectToSetup` 未启用（已知差异） |
 | Phase 6 模板/页面 | 100% | 首页 + 认证页 + 用户中心 + 皮肤库 + 管理端全部页面（含通信可视化编辑器）+ i18n |
 | Phase 7 插件系统 | 80% | 清单/启停/删除/上传/wget/市场 + Go 原生 Hook 7 方法/Filter/24 事件；插件市场缓存与 PHP 插件代码执行未支持 |
-| Phase 8 测试/CI | 100% | 单测 + 四库矩阵 + Go HTTP E2E + race/覆盖率 + 浏览器 E2E + 安全用例 + GitHub Actions 全绿；新增 ACCEPTANCE/DEPLOYMENT/verify.ps1 |
+| Phase 8 测试/CI | 95% | 本地 `go build/vet/test ./...` 全绿（2026-11-04）；race/覆盖率/浏览器 E2E/四库矩阵 job 已配置；性能压测与 67 用例逐条对照未完成 |
 
 ## 3. 已完成的功能
 
@@ -64,7 +64,25 @@
 
 ## 5. 变更记录
 
-### 2026-11-02（本轮）
+### 2026-11-04（文档校准 + 方法级路由补齐）
+
+- **路由方法级对齐**：`POST /skinlib` 补为 `POST /texture` 的同处理器别名；
+  `/auth/captcha`、`/admin/customize|options|score|resource`、
+  `/admin/plugins/config/:name`、`/.well-known/change-password` 改为
+  `router.Any`（`POST` 仍由页面处理器内部转给保存逻辑，其余方法渲染页面）。
+  重跑路由差异：228 个「方法×路径」仅剩 `QUERY`（非标准方法）与
+  `/{player}.json`/`/csl/{player}.json` 的 catch-all 形状差异。
+- **README/AGENTS 状态修正**：删除「Phase 0/0.5 完成、Phase 1/2 进行中」
+  与「尚无 Go 代码」等过期描述，统一指向 `PROGRESS.md`/`ACCEPTANCE.md`。
+- **MIGRATION 清单校准**：Phase 0.5 CI 改为已配置；Phase 2 去掉“进行中”；
+  Session 与 Phase 5 的已知差异保留明确说明；Phase 8 的 67 用例说明改为
+  “未逐条对照”。
+- **ACCEPTANCE/DB-MATRIX**：补方法级路由说明；数据库矩阵区分「本机实测日期」
+  与「CI db-matrix job」。
+- **本地验证**：`go build ./...`、`go vet ./...`、`go test ./... -count=1`
+  全部通过。
+
+### 2026-11-02（上一轮）
 
 - **文档校准**：
   - `ACCEPTANCE.md`：插件事件口径改为「24 个常量 + PHP 原生 5 个派发点已
