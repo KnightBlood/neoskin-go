@@ -14,7 +14,8 @@
 
 1. **HTTP 接口零变更**：所有 174 条路由的路径、方法、请求参数名、请求体字段名、响应 JSON 结构必须与源完全一致。详见 `MIGRATION.md` §6。
 2. **数据完全兼容**：17 张表的表名/字段名/类型/主键（`uid`/`pid`/`tid`）与存量数据必须可读。密码哈希 bcrypt `$2y$` 必须可验证。纹理 `hash` 算法 SHA-256 保持。
-3. **插件 API 契约**：Hook（7 方法）、PluginManager（13 方法）、Plugin、24 个 Event 的对外语义保持。
+3. **插件 API 契约**：Hook（7 方法）、PluginManager（13 方法）、Plugin、24 个 Event 的对外语义保持；
+   PHP 插件代码不可执行，原生扩展按 D-001 重写（见根目录 `DECISIONS.md`）。
 4. **patch 功能保留**：6.0.3 ~ 6.0.11_patch 全部功能。
 5. **禁止修改源目录**：`blessing-skin-server-Laravel13`、`blessing-skin-server`、`blessing-skin-server-patch` 为只读参考。
 6. **前端直接复用，不自己重写**：`resources/assets/`（前端源码）与

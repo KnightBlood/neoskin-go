@@ -67,7 +67,7 @@
 | Hook 7 方法语义（菜单/路由/样式/脚本/徽章/通知/中间件） | ✅ Go 原生 API |
 | Filter（add/apply/remove/priority） | ✅ |
 | 24 个事件 + Dispatcher | ✅ 24 个常量；PHP 原生 5 个派发点（ConfigureRoutes + 4 个插件生命周期）已对齐，另派发业务事件供 Go 插件监听 |
-| PHP 插件代码执行 | ❌ 不支持（Go 无法执行 PHP；与 .NET AOT 策略一致） |
+| PHP 插件代码执行 | ❌ 不支持（D-001：原生 Go Hook/Filter/Event，PHP 插件需重写） |
 
 ## 6. 测试与 CI
 
