@@ -11,6 +11,8 @@ import (
 	"neoskin/internal/model"
 	"neoskin/internal/php"
 	"neoskin/internal/repo"
+	"neoskin/internal/service"
+	"neoskin/internal/update"
 	"neoskin/tests/support"
 )
 
@@ -36,7 +38,7 @@ func TestBrowserFlows(t *testing.T) {
 	}
 
 	server := support.Start(t)
-	seedBrowserUser(t, server.DBPath)
+	seedBrowserUser(t, server.DBPath, filepath.Join(server.WorkDir, "storage"))
 
 	command := exec.Command("node", filepath.Join("tests", "browser", "flows.mjs"))
 	command.Dir = server.Root
@@ -62,7 +64,7 @@ func hasFrontendAssets(dir string) bool {
 	return false
 }
 
-func seedBrowserUser(t *testing.T, dbPath string) {
+func seedBrowserUser(t *testing.T, dbPath, storage string) {
 	t.Helper()
 	conn, dialect, err := db.Open(db.Config{Connection: "sqlite", Database: dbPath})
 	if err != nil {
@@ -83,6 +85,17 @@ func seedBrowserUser(t *testing.T, dbPath string) {
 		t.Fatal(err)
 	}
 	if err := users.UpdateVerified(uid, true); err != nil {
+		t.Fatal(err)
+	}
+
+	// 全局 RedirectToSetup 现在要求 install.lock；否则 `/` 会 302 到 /setup。
+	if err := service.NewOption(conn, dialect).Set("version", update.AppVersion()); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(storage, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(storage, "install.lock"), []byte{}, 0o644); err != nil {
 		t.Fatal(err)
 	}
 }
