@@ -34,6 +34,29 @@ jobs:
       - run: go vet ./...
       - run: go test ./... -count=1
 
+  platform:
+    name: Platform (${{ matrix.os }} / ${{ matrix.arch }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, arch: x64 }
+          - { os: ubuntu-24.04-arm, arch: arm64 }
+          - { os: windows-latest, arch: x64 }
+          - { os: windows-11-arm, arch: arm64 }
+          - { os: macos-15-intel, arch: x64 }
+          - { os: macos-latest, arch: arm64 }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+      - run: go build ./...
+      - run: go test ./... -count=1
+
   race-coverage:
     name: Race detector & coverage
     runs-on: ubuntu-latest

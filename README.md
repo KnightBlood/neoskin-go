@@ -156,6 +156,22 @@ PostgreSQL 5433 / WiltonDB 1433，设置对应 `DB_*` 后运行矩阵测试。
 | [DEPLOYMENT.md](DEPLOYMENT.md) | 构建、配置、部署与升级 |
 | [DB-MATRIX.md](DB-MATRIX.md) | 数据库矩阵 |
 
+## 支持平台
+
+| 平台 | 架构 | CI |
+| --- | --- | --- |
+| Linux | x86_64 / aarch64 | `platform` 矩阵：`go build` + `go test` |
+| Windows | x86_64 / arm64 | 同上 |
+| macOS | x86_64 / arm64 | 同上 |
+
+Go 可直接交叉编译，例如：
+
+```bash
+GOOS=linux   GOARCH=arm64 go build ./...
+GOOS=windows GOARCH=arm64 go build ./...
+GOOS=darwin  GOARCH=arm64 go build ./...
+```
+
 ## 硬约束
 
 1. HTTP 接口零变更（路径/参数/响应结构）
