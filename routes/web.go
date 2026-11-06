@@ -57,7 +57,12 @@ func Web() {
 	}, plugin.DefaultHook.PushedMiddlewares()...)
 	web := facades.Route().Middleware(groupMiddlewares...)
 	web.Group(func(router route.Router) {
-		router.Get("/", homeController.Index)
+		router.Get("/", func(ctx http.Context) http.Response {
+			if controllers.FrontendMode() == "next" {
+				return ctx.Response().Redirect(nethttp.StatusFound, "/app-next/site/")
+			}
+			return homeController.Index(ctx)
+		})
 		authController := controllers.NewAuthController()
 		apiController := controllers.NewApiController()
 		userController := controllers.NewUserController()
@@ -202,7 +207,12 @@ func Web() {
 		router.Get("/user/inbox", userController.InboxPage)
 		router.Get("/user/inbox/:id", userController.MessagePage)
 		router.Middleware(oauthmw.RequireScopes("Notification.Read")).Get("/api/user/notifications", notificationController.Unread)
-		router.Get("/admin", adminController.IndexPage)
+		router.Get("/admin", func(ctx http.Context) http.Response {
+			if controllers.FrontendMode() == "next" {
+				return ctx.Response().Redirect(nethttp.StatusFound, "/app-next/admin/")
+			}
+			return adminController.IndexPage(ctx)
+		})
 		router.Get("/admin/chart", adminController.Chart)
 		router.Get("/admin/status", adminController.Status)
 		router.Get("/admin/plugins/data", pluginController.Data)
