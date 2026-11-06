@@ -63,6 +63,14 @@ func Start(t *testing.T) *Server {
 		t.Fatalf("install: %v\n%s", err, output)
 	}
 
+	// 全局 RedirectToSetup：测试站点视为已安装，避免页面 302 /setup。
+	if err := os.MkdirAll(storage, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(storage, "install.lock"), []byte{}, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
 	server := exec.Command(binary)
 	server.Dir = root
 	server.Env = append(os.Environ(), env...)

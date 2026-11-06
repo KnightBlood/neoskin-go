@@ -52,6 +52,11 @@
     </form>
 {{template "setup-close" .}}{{end}}
 
+{{define "setup_locked"}}{{template "setup-open" .}}
+    <p>{{t "setup.locked.text"}}</p>
+    <p><a class="btn btn-primary" href="/">{{t "setup.locked.button"}}</a></p>
+{{template "setup-close" .}}{{end}}
+
 {{define "setup_finish"}}{{template "setup-open" .}}
     <p>{{t "setup.wizard.finish.text"}}</p>
     <a class="btn btn-primary" href="/">{{t "setup.locked.button"}}</a>

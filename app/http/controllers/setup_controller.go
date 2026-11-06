@@ -52,9 +52,8 @@ func (r *SetupController) Show(ctx goravelhttp.Context) goravelhttp.Response {
 }
 
 func lockedResponse(ctx goravelhttp.Context) goravelhttp.Response {
-	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
-		"installed": true, "message": t(ctx, "setup.locked.text"),
-	})
+	// PHP `CheckInstallation`：已安装时渲染 setup.locked 视图（不是 JSON）。
+	return renderSetupPage(ctx, "setup_locked", "setup.locked.title", nil)
 }
 
 // Database 处理 ANY /setup/database。
