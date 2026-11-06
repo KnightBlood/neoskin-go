@@ -293,3 +293,17 @@
 1. 文档校准（PROGRESS 阶段百分比、ACCEPTANCE Hook 7 方法表述等）。
 2. 前端 P0：`NeoSkinFrontend` workspace + `apps/site`(TDesign) / `apps/admin`(antd)
    / `packages/core` / `packages/contract` 骨架（写前端代码前不动后端文档）。
+
+---
+
+## 8. 共享前端 P1（2026-11-06）
+
+- 新增 `GET /api/bootstrap`（契约 v1：`contractVersion/apiBase/locale/siteName/version/basePath/mode/csrfToken/locales/user/options/features/plugins`）。
+- 新增 SPA 壳 `GET /app-next/{site,admin}`、`/app-next/{site,admin}/*`：
+  - 静态资源直出并带 `Cache-Control: public, max-age=31536000, immutable`；
+  - 非静态路径回退 `index.html`，注入 `<meta name="csrf-token">`、`<meta name="neoskin-mode">` 与 `#neoskin-bootstrap`；
+  - 带扩展名的缺失文件返回 404，不回退 HTML。
+- 构建产物已发布到 `public/app-next/{site,admin}`（12 个文件 + `manifest.json`）。
+- `FRONTEND_MODE` 默认 `legacy`，不改变现有 PHP 兼容页面。
+- 实现：`app/http/controllers/spa_controller.go`、`routes/web.go`。
+- 联调验证：`/app-next/site/auth/login` 登录 → `/user` → `/app-next/admin/` 仪表盘，0 console error。
