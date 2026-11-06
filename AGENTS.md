@@ -1,5 +1,7 @@
 # AGENTS.md — NeoSkinGo (Go / Goravel) 迁移约束
 
+> 最后更新：2026-11-06
+
 本文件约束所有 agent 在 `NeoSkinGo/` 目录内的行为。
 
 ---

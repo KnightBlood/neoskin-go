@@ -1,5 +1,7 @@
 # NeoSkinGo
 
+> 最后更新：2026-11-06
+
 > 仓库：<https://github.com/KnightBlood/neoskin-go>
 
 Go / Goravel 实现的 Minecraft 皮肤托管平台后端，迁移自 `blessing-skin-server-Laravel13`（6.0.11_patch）。
@@ -141,14 +143,18 @@ PostgreSQL 5433 / WiltonDB 1433，设置对应 `DB_*` 后运行矩阵测试。
 命令与跨库坑位见 [DB-MATRIX.md](./DB-MATRIX.md)；跨语言版见工作区根目录
 `../DATABASE-MATRIX-PLAYBOOK.md`（不随仓库提交）。
 
-## 文档
+## 文档索引
 
-- [MIGRATION.md](./MIGRATION.md) — 迁移计划与阶段划分
-- [AGENTS.md](./AGENTS.md) — agent 行为约束
-- [DB-MATRIX.md](./DB-MATRIX.md) — 五数据库矩阵与 Go/GORM 坑位
-- [PROGRESS.md](./PROGRESS.md) — 当前进度快照（每次会话结束更新）
-- [ACCEPTANCE.md](./ACCEPTANCE.md) — 验收清单（路由/数据/前端/插件/CI）
-- [DEPLOYMENT.md](./DEPLOYMENT.md) — 部署、反向代理、在线更新与从 PHP 迁移
+| 文档 | 内容 |
+| --- | --- |
+| [README.md](README.md) | 项目入口、快速开始 |
+| [AGENTS.md](AGENTS.md) | agent 行为约束 |
+| [PROGRESS.md](PROGRESS.md) | 进度快照与变更记录 |
+| [ACCEPTANCE.md](ACCEPTANCE.md) | 验收清单 |
+| [MIGRATION.md](MIGRATION.md) | 迁移计划与阶段 |
+| [PORT-NOTES.md](PORT-NOTES.md) | 偏差、决策与踩坑 |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | 构建、配置、部署与升级 |
+| [DB-MATRIX.md](DB-MATRIX.md) | 数据库矩阵 |
 
 ## 硬约束
 
