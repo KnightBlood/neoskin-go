@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"encoding/base64"
 	"fmt"
 	"html"
 	nethttp "net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -290,6 +292,8 @@ func (r *OAuthController) Token(ctx goravelhttp.Context) goravelhttp.Response {
 		return r.tokenFromCode(ctx, repository, keys)
 	case "refresh_token":
 		return r.tokenFromRefresh(ctx, repository, keys)
+	case "client_credentials":
+		return r.tokenFromClientCredentials(ctx, repository, keys)
 	}
 	return ctx.Response().Json(nethttp.StatusBadRequest, goravelhttp.Json{
 		"error": "unsupported_grant_type",
@@ -301,6 +305,9 @@ func (r *OAuthController) tokenFromCode(ctx goravelhttp.Context, repository *rep
 	codeValue := ctx.Request().Input("code")
 	clientID := ctx.Request().InputInt("client_id")
 	clientSecret := ctx.Request().Input("client_secret")
+	if id, secret, ok := basicClient(ctx); ok {
+		clientID, clientSecret = id, secret
+	}
 	redirectURI := ctx.Request().Input("redirect_uri")
 	code, err := repository.FindAuthCode(codeValue)
 	if err != nil {
@@ -366,6 +373,77 @@ func (r *OAuthController) tokenFromRefresh(ctx goravelhttp.Context,
 	if err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
+	return tokenResponse(ctx, issued)
+}
+
+// basicClient 解析 `Authorization: Basic base64(client_id:client_secret)`。
+//
+// RFC 6749 要求客户端凭据先做 form-urlencoded 再做 Base64；这里对 id/secret
+// 各做一次 QueryUnescape。
+func basicClient(ctx goravelhttp.Context) (int, string, bool) {
+	header := ctx.Request().Header("Authorization")
+	if header == "" || !strings.HasPrefix(strings.ToLower(header), "basic ") {
+		return 0, "", false
+	}
+
+	decoded, err := base64.StdEncoding.DecodeString(strings.TrimSpace(header[6:]))
+	if err != nil {
+		return 0, "", false
+	}
+	parts := strings.SplitN(string(decoded), ":", 2)
+	if len(parts) != 2 {
+		return 0, "", false
+	}
+
+	id, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return 0, "", false
+	}
+	secret, err := url.QueryUnescape(parts[1])
+	if err != nil {
+		secret = parts[1]
+	}
+
+	return id, secret, true
+}
+
+// tokenFromClientCredentials 处理 client_credentials grant。
+//
+// Passport 默认启用该 grant（password grant 默认关闭）；没有用户，也不下发
+// refresh token。scope 省略时使用 Passport 的默认 scope `User.Read`。
+func (r *OAuthController) tokenFromClientCredentials(ctx goravelhttp.Context,
+	repository *repo.OAuthRepository, keys *oauth.Keys) goravelhttp.Response {
+	clientID := ctx.Request().InputInt("client_id")
+	clientSecret := ctx.Request().Input("client_secret")
+	if id, secret, ok := basicClient(ctx); ok {
+		clientID, clientSecret = id, secret
+	}
+
+	client, err := repository.FindClient(clientID)
+	if err != nil {
+		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
+	}
+	if client == nil || client.Revoked {
+		return ctx.Response().Json(nethttp.StatusUnauthorized, goravelhttp.Json{
+			"error": "invalid_client",
+		})
+	}
+	if client.Secret != "" && !php.VerifyPassword(client.Secret, clientSecret) {
+		return ctx.Response().Json(nethttp.StatusUnauthorized, goravelhttp.Json{
+			"error": "invalid_client",
+		})
+	}
+
+	scopes := splitScopes(ctx.Request().Input("scope"))
+	if len(scopes) == 0 {
+		scopes = []string{"User.Read"}
+	}
+
+	issued, err := oauth.Issue(repository, keys, nil, client.ID, "", scopes, false)
+	if err != nil {
+		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
+	}
+
 	return tokenResponse(ctx, issued)
 }
 

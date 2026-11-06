@@ -219,3 +219,16 @@ go test ./internal/db -run TestMatrix -v
 
 ## 7. Go 版本- `go.mod` 要求 **Go 1.26**：依赖链中的 `golang.org/x/crypto v0.58.0` 声明 `go 1.26.0`，因此 CI 的 `setup-go` 固定 `1.26`。本地开发使用 1.27 亦可向下兼容编译。
 
+## 8. 自动升级与 CLI（2026-11-06）
+
+- 全局 `RedirectToSetup` 用 Goravel `WithMiddleware` 注册；`Redirect` 必须调用
+  `Abort()` 才会结束请求（否则控制器仍会写 200）。
+- 请求期 `update` 先跑幂等建表再读 `options.version`，这样「代码新、库为空/半旧」
+  也能恢复；PHP 是 procedures → migrate，本端口顺序不同但结果一致。
+- `options.version` 缺失视为已安装（与 PHP `option('version', $version)` 一致），
+  不触发升级。
+- CLI 通过 `artisan` 入口（`go run . artisan <cmd>`）；Web 二进制收到 `<cmd>` 参数
+  仍会启动 HTTP 服务。
+- `client_credentials` 默认 scope 为 `User.Read`，与 `Passport::setDefaultScope` 对齐；
+  `password` grant 保持 PHP 默认关闭。
+

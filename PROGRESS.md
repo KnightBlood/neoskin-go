@@ -1,7 +1,7 @@
 # NeoSkinGo — 进度快照
 
 > 每次会话结束更新本文件，并在回复末尾给出「进度」一行。
-> 最后更新：2026-11-04。
+> 最后更新：2026-11-06。
 > 仓库：<https://github.com/KnightBlood/neoskin-go>
 
 ## 1. 总览
@@ -29,7 +29,7 @@
 | Phase 2 认证/授权 | 100% | 登录/注册/验证码/登出、OAuth2 全端点、Bearer + scope、找回/重置/验证/绑定、`NEOSKIN_APP_KEY` 签名 URL、locale 检测 |
 | Phase 3 业务控制器 | 100% | Auth/User/Player/Closet/Texture/Skinlib/Report + avatar/preview 渲染 |
 | Phase 4 管理端 | 90% | 全部页面与 API 已接通（Users/Players/Closet/Options/Customize/Score/Resource/i18n/Communications/Status/Chart/Plugins/Update）；剩余交互细节对齐 |
-| Phase 5 安装向导 | 90% | `/setup` 欢迎页、数据库表单、信息表单、完成页（HTML）+ 建表/管理员/install.lock；全局 `RedirectToSetup` 未启用（已知差异） |
+| Phase 5 安装向导 | 100% | `/setup` 欢迎页、数据库表单、信息表单、完成页（HTML）+ 建表/管理员/install.lock；全局 `RedirectToSetup` 已启用（未安装 302、请求期自动 `update`） |
 | Phase 6 模板/页面 | 100% | 首页 + 认证页 + 用户中心 + 皮肤库 + 管理端全部页面（含通信可视化编辑器）+ i18n |
 | Phase 7 插件系统 | 80% | 清单/启停/删除/上传/wget/市场 + Go 原生 Hook 7 方法/Filter/24 事件；插件市场缓存与 PHP 插件代码执行未支持 |
 | Phase 8 测试/CI | 95% | 本地 `go build/vet/test ./...` 全绿（2026-11-04）；race/覆盖率/浏览器 E2E/四库矩阵 job 已配置；性能压测与 67 用例逐条对照未完成 |
@@ -63,6 +63,20 @@
 `/csl/{player}.json` 共用一个 handler）。
 
 ## 5. 变更记录
+
+### 2026-11-06（后端功能补齐：自动升级 + CLI + client_credentials）
+
+- 新增全局中间件 `app/http/middleware/redirect_to_setup.go`：未安装时除 `setup*`
+  外一律 302 `/setup`；已安装且 `options.version` 落后时请求期执行 `update`。
+- 新增 `internal/update/upgrade.go`：`update` 的共享实现（5.0.0 `home_pic_url`
+  从 `bg.jpg` 改为 `bg.webp`、版本号、幂等建表、清缓存、补 `install.lock`），
+  用互斥锁串行化，失败可在下个请求重试。
+- 新增 CLI：`update`、`bs:install {email} {password} {nickname}`、`options:cache`、
+  `plugin:enable|disable {name}`、`salt:random [--show]`，通过 `artisan` 入口执行。
+- `POST /oauth/token` 新增 `client_credentials` grant（Passport 默认启用）与
+  HTTP Basic 客户端认证（authorization_code / client_credentials 均支持）。
+- 测试新增 `internal/update/upgrade_test.go`、`redirect_to_setup_test.go`；
+  `go build/vet/test ./...` 全绿。
 
 ### 2026-11-04（文档校准 + 方法级路由补齐）
 
