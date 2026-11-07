@@ -326,3 +326,5 @@
 - 新增 `GET /api/admin/dashboard`：用户/角色/材质数量与存储空间（KB + 人类可读）。
 - 实现：`app/http/controllers/admin_controller.go`（`Dashboard`）、`routes/web.go`。
 - 验证：`go build` / `go test ./...`；管理端仪表盘浏览器联调通过。
+
+- `POST /admin/i18n`：当 `Accept: application/json` 时返回 `{code:0,message}`（共享前端直接调用），否则保持原 302 跳转。

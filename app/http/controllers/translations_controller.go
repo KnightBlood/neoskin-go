@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	nethttp "net/http"
+	"strings"
 
 	goravelhttp "github.com/goravel/framework/contracts/http"
 
@@ -80,6 +81,12 @@ func (r *TranslationsController) Create(ctx goravelhttp.Context) goravelhttp.Res
 	if err := repo.NewLanguageLineRepository(conn, dialect).
 		Create(group, key, locale, text); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
+	}
+	// 共享前端以 JSON 调用时不再 302（浏览器会跟随跳转并访问旧页面）。
+	if strings.Contains(strings.ToLower(ctx.Request().Header("Accept")), "application/json") {
+		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
+			"code": 0, "message": t(ctx, "admin.i18n.added"),
+		})
 	}
 	ctx.Response().Header("Location", "/admin/i18n")
 	return ctx.Response().String(nethttp.StatusFound, "")
