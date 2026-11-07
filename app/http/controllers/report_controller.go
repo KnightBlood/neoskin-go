@@ -97,36 +97,6 @@ func (r *ReportController) Submit(ctx goravelhttp.Context) goravelhttp.Response 
 	})
 }
 
-// Track 处理 GET /user/reports（当前返回分页 JSON）。
-func (r *ReportController) Track(ctx goravelhttp.Context) goravelhttp.Response {
-	user, conn, dialect, err := currentUser(ctx)
-	if err != nil {
-		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
-	}
-	if user == nil {
-		return ctx.Response().Json(nethttp.StatusUnauthorized, goravelhttp.Json{
-			"message": "Unauthenticated.",
-		})
-	}
-
-	page := ctx.Request().InputInt("page", 1)
-	if page < 1 {
-		page = 1
-	}
-	const perPage = 10
-	reports := repo.NewReportRepository(conn, dialect)
-	total, _ := reports.CountByReporter(user.UID)
-	rows, err := reports.PageByReporter(user.UID, perPage, (page-1)*perPage)
-	if err != nil {
-		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
-	}
-	data := make([]reportJSON, 0, len(rows))
-	for _, row := range rows {
-		data = append(data, toReportJSON(row))
-	}
-	return ctx.Response().Json(nethttp.StatusOK, paginatorJSON(ctx, data, total, page, perPage))
-}
-
 // Manage 处理 GET /admin/reports/list、/api/admin/reports。
 func (r *ReportController) Manage(ctx goravelhttp.Context) goravelhttp.Response {
 	user, conn, dialect, resp := requireAdmin(ctx)
@@ -149,6 +119,52 @@ func (r *ReportController) Manage(ctx goravelhttp.Context) goravelhttp.Response 
 	data := make([]reportJSON, 0, len(rows))
 	for _, row := range rows {
 		data = append(data, toReportJSON(row))
+	}
+	return ctx.Response().Json(nethttp.StatusOK, paginatorJSON(ctx, data, total, page, perPage))
+}
+
+// Track 处理 GET /api/user/reports：当前用户提交的举报（分页）。
+func (r *ReportController) Track(ctx goravelhttp.Context) goravelhttp.Response {
+	user, conn, dialect, err := currentUser(ctx)
+	if err != nil {
+		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
+	}
+	if user == nil {
+		return ctx.Response().Json(nethttp.StatusUnauthorized, goravelhttp.Json{
+			"message": "Unauthenticated.",
+		})
+	}
+
+	page := ctx.Request().InputInt("page", 1)
+	if page < 1 {
+		page = 1
+	}
+	perPage := ctx.Request().InputInt("per_page", 10)
+	if perPage <= 0 {
+		perPage = 10
+	}
+	if perPage > 100 {
+		perPage = 100
+	}
+
+	reports := repo.NewReportRepository(conn, dialect)
+	total, _ := reports.CountByReporter(user.UID)
+	rows, err := reports.PageByReporter(user.UID, perPage, (page-1)*perPage)
+	if err != nil {
+		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
+	}
+
+	textures := repo.NewTextureRepository(conn, dialect)
+	data := make([]goravelhttp.Json, 0, len(rows))
+	for _, row := range rows {
+		name := ""
+		if texture, _ := textures.FindByTid(row.TID); texture != nil {
+			name = texture.Name
+		}
+		data = append(data, goravelhttp.Json{
+			"id": row.ID, "tid": row.TID, "texture_name": name, "reason": row.Reason,
+			"status": row.Status, "report_at": row.ReportAt,
+		})
 	}
 	return ctx.Response().Json(nethttp.StatusOK, paginatorJSON(ctx, data, total, page, perPage))
 }

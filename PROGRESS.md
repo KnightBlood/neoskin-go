@@ -307,3 +307,17 @@
 - `FRONTEND_MODE` 默认 `legacy`，不改变现有 PHP 兼容页面。
 - 实现：`app/http/controllers/spa_controller.go`、`routes/web.go`。
 - 联调验证：`/app-next/site/auth/login` 登录 → `/user` → `/app-next/admin/` 仪表盘，0 console error。
+
+---
+
+## 9. 共享前端 P3（2026-11-07）
+
+- 新增用户中心契约端点（不改变既有 174 条 PHP 路由）：
+  - `GET /api/user/inbox?page=&per_page=`：分页 + `unread`，条目含 `preview`/`format`/`communication_id`；
+  - `GET /api/user/inbox/{id}`：`{code,data}`，返回渲染后 `content` 并自动写 `read_at`；
+  - `GET /api/user/reports?page=&per_page=`：当前用户举报分页，含 `texture_name`。
+- 实现：`app/http/controllers/notification_controller.go`（`Inbox`/`Message`/预览清洗）、
+  `app/http/controllers/report_controller.go`（`Track`）、`internal/repo/notification.go`
+  （`CountUnreadByUser`）、`routes/web.go`。
+- 验证：`go build` / `go test ./...` 全绿；本机 SQLite 浏览器联调站内信列表/详情（已读）与举报分页，
+  前端 `contract-check.mjs` 匿名 401 断言通过。

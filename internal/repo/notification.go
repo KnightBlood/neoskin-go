@@ -49,6 +49,16 @@ func (r *NotificationRepository) CountByUser(uid int) (int, error) {
 	return count, err
 }
 
+// CountUnreadByUser 未读数（`whereNull('read_at')->count()`）。
+func (r *NotificationRepository) CountUnreadByUser(uid int) (int, error) {
+	var count int
+	err := r.DB.QueryRow(db.Rebind(r.Dialect,
+		`SELECT COUNT(*) FROM notifications
+		 WHERE notifiable_type = ? AND notifiable_id = ? AND read_at IS NULL`),
+		NotifiableType, uid).Scan(&count)
+	return count, err
+}
+
 func (r *NotificationRepository) PageByUser(uid, limit, offset int) ([]NotificationRow, error) {
 	query := `SELECT id, type, data, read_at, created_at, updated_at FROM notifications
 		WHERE notifiable_type = ? AND notifiable_id = ? ORDER BY created_at DESC ` +
