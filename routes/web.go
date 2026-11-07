@@ -198,6 +198,8 @@ func Web() {
 		router.Put("/admin/i18n/:line", translationsController.Update)
 		router.Delete("/admin/i18n/:line", translationsController.Delete)
 		router.Get("/admin/communications", communicationsController.CommunicationsPage)
+		router.Get("/api/admin/communications", communicationsController.Index)
+		router.Get("/api/admin/communications/:communication", communicationsController.Editor)
 		router.Post("/admin/communications", communicationsController.Store)
 		// Laravel 路由：throttle:90,1 / throttle:30,1。
 		router.Middleware(oauthmw.Throttle(90, 60)).Post("/admin/communications/preview", communicationsController.Preview)

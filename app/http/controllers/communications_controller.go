@@ -49,10 +49,53 @@ func (r *CommunicationsController) Index(ctx goravelhttp.Context) goravelhttp.Re
 	for _, row := range rows {
 		data = append(data, goravelhttp.Json{
 			"id": row.ID, "title": row.Title, "kind": row.Kind, "status": row.Status,
-			"read_count": 0, "delivery_count": 0, "updated_at": row.UpdatedAt,
+			"read_count":     communications.ReadCount(row.ID),
+			"delivery_count": communications.DeliveryCount(row.ID),
+			"updated_at":     row.UpdatedAt,
 		})
 	}
 	return ctx.Response().Json(nethttp.StatusOK, paginatorJSON(ctx, data, total, page, perPage))
+}
+
+// Editor 处理 GET /api/admin/communications/{communication}：编辑器初始数据。
+func (r *CommunicationsController) Editor(ctx goravelhttp.Context) goravelhttp.Response {
+	_, conn, dialect, resp := requireAdmin(ctx)
+	if resp != nil {
+		return resp
+	}
+	id := ctx.Request().RouteInt("communication")
+	row, err := repo.NewCommunicationRepository(conn, dialect).Find(id)
+	if err != nil {
+		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
+	}
+	if row == nil {
+		return ctx.Response().String(nethttp.StatusNotFound, "Not Found")
+	}
+	audience := map[string]any{}
+	if row.Audience != "" {
+		_ = json.Unmarshal([]byte(row.Audience), &audience)
+	}
+	blocks := []any{}
+	if row.Blocks != "" {
+		_ = json.Unmarshal([]byte(row.Blocks), &blocks)
+	}
+	editor := row.Editor
+	if editor == "" {
+		editor = "blocks"
+	}
+	receiver, _ := audience["receiver"].(string)
+	if receiver == "" {
+		receiver = "all"
+	}
+	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
+		"id": row.ID, "title": row.Title, "kind": row.Kind, "status": row.Status,
+		"locale": row.Locale, "editor": editor, "source": row.Source, "blocks": blocks,
+		"audience": goravelhttp.Json{
+			"receiver": receiver,
+			"uid":      audience["uid"],
+			"email":    audience["email"],
+		},
+	})
 }
 
 // CommunicationsPage 处理 GET /admin/communications（历史列表页）。
@@ -193,7 +236,7 @@ func (r *CommunicationsController) Store(ctx goravelhttp.Context) goravelhttp.Re
 			if err := communications.Update(row); err != nil {
 				return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 			}
-			return redirectCommunication(ctx, row, true)
+			return communicationSaved(ctx, row, true)
 		}
 	}
 
@@ -205,7 +248,7 @@ func (r *CommunicationsController) Store(ctx goravelhttp.Context) goravelhttp.Re
 	}
 	row.ID = id
 	deliver(conn, dialect, row)
-	return redirectCommunication(ctx, row, row.Kind == repo.CommunicationAnnouncement)
+	return communicationSaved(ctx, row, row.Kind == repo.CommunicationAnnouncement)
 }
 
 // Update 处理 PUT /admin/communications/{communication}。
@@ -238,7 +281,7 @@ func (r *CommunicationsController) Update(ctx goravelhttp.Context) goravelhttp.R
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
 	}
 	deliver(conn, dialect, row)
-	return redirectCommunication(ctx, row, row.Kind == repo.CommunicationAnnouncement)
+	return communicationSaved(ctx, row, row.Kind == repo.CommunicationAnnouncement)
 }
 
 // Withdraw 处理 POST /admin/communications/{communication}/withdraw。
@@ -250,6 +293,11 @@ func (r *CommunicationsController) Withdraw(ctx goravelhttp.Context) goravelhttp
 	id := ctx.Request().RouteInt("communication")
 	if err := repo.NewCommunicationRepository(conn, dialect).Withdraw(id); err != nil {
 		return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
+	}
+	if ctx.Request().Header("X-Neoskin-Spa") != "" {
+		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
+			"code": 0, "message": "内容已撤回。",
+		})
 	}
 	ctx.Response().Header("Location", "/admin/communications")
 	return ctx.Response().String(nethttp.StatusFound, "")
@@ -374,6 +422,21 @@ func deliver(conn *sql.DB, dialect *db.Dialect, row repo.CommunicationRow) {
 	for _, id := range ids {
 		_ = notifications.Insert(id, payload, php.Now())
 	}
+}
+
+func communicationSaved(ctx goravelhttp.Context, row repo.CommunicationRow,
+	announcement bool) goravelhttp.Response {
+	if ctx.Request().Header("X-Neoskin-Spa") != "" {
+		message := "内容已保存。"
+		if row.Status == repo.CommunicationPublished {
+			message = "内容已发布。"
+		}
+		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
+			"code": 0, "message": message,
+			"data": goravelhttp.Json{"id": row.ID, "status": row.Status},
+		})
+	}
+	return redirectCommunication(ctx, row, announcement)
 }
 
 func redirectCommunication(ctx goravelhttp.Context, row repo.CommunicationRow,
