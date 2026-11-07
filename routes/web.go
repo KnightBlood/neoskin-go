@@ -218,6 +218,7 @@ func Web() {
 		})
 		router.Get("/admin/chart", adminController.Chart)
 		router.Get("/api/admin/dashboard", adminController.Dashboard)
+		router.Any("/api/admin/options/:group", adminOptionsController.OptionsGroup)
 		router.Get("/admin/status", adminController.Status)
 		router.Get("/admin/plugins/data", pluginController.Data)
 		router.Get("/admin/plugins/manage", adminController.PluginsPage)

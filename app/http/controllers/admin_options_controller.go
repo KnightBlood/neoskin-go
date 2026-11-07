@@ -35,6 +35,92 @@ var optionBoolFields = map[string]bool{
 	"enable_preview_cache":            true,
 }
 
+var adminOptionGroups = map[string][]string{
+	"options": {
+		"site_name", "site_description", "site_url", "register_with_player_name",
+		"require_verification", "regs_per_ip", "max_upload_file_size", "max_texture_width",
+		"player_name_rule", "custom_player_name_regexp", "player_name_length_min",
+		"player_name_length_max", "auto_del_invalid_texture", "allow_downloading_texture",
+		"status_code_for_private", "texture_name_regexp", "content_policy",
+		"meta_keywords", "meta_description", "meta_extras", "recaptcha_sitekey",
+		"recaptcha_secretkey", "recaptcha_invisible", "update_source",
+		"plugin_market_source",
+	},
+	"customize": {
+		"home_pic_url", "favicon_url", "transparent_navbar", "hide_intro", "fixed_bg",
+		"copyright_prefer", "copyright_text", "custom_css", "custom_js",
+		"navbar_color", "sidebar_color",
+	},
+	"score": {
+		"score_per_storage", "private_score_per_storage", "score_per_closet_item",
+		"return_score", "score_per_player", "user_initial_score",
+		"reporter_score_modification", "reporter_reward_score",
+		"sign_gap_time", "sign_after_zero", "score_award_per_texture",
+		"take_back_scores_after_deletion", "score_award_per_like",
+	},
+	"resource": {
+		"force_ssl", "auto_detect_asset_url", "cdn_address", "cache_expire_time",
+		"enable_avatar_cache", "enable_preview_cache", "allow_downloading_texture",
+	},
+}
+
+// OptionsGroup 处理 GET|PUT /api/admin/options/{group}（共享前端 P4）。
+func (r *AdminOptionsController) OptionsGroup(ctx goravelhttp.Context) goravelhttp.Response {
+	group := ctx.Request().Route("group")
+	keys, ok := adminOptionGroups[group]
+	if !ok {
+		return ctx.Response().String(nethttp.StatusNotFound, "Not Found")
+	}
+	_, conn, dialect, resp := requireAdmin(ctx)
+	if resp != nil {
+		return resp
+	}
+	options := service.NewOption(conn, dialect)
+	method := ctx.Request().Method()
+	if method != nethttp.MethodGet {
+		if group == "options" {
+			locale := localeMiddleware.LocaleOf(ctx)
+			for _, key := range []string{"site_name", "site_description", "content_policy"} {
+				if value := ctx.Request().Input(key); value != "" {
+					_ = options.Set(key+"_"+locale, value)
+				}
+			}
+		}
+		if group == "score" {
+			from := ctx.Request().Input("sign_score_from")
+			to := ctx.Request().Input("sign_score_to")
+			if from != "" && to != "" {
+				if err := options.Set("sign_score", from+","+to); err != nil {
+					return ctx.Response().String(nethttp.StatusInternalServerError, err.Error())
+				}
+			}
+		}
+		return r.handle(ctx, keys)
+	}
+
+	locale := localeMiddleware.LocaleOf(ctx)
+	values := make(goravelhttp.Json, len(keys)+2)
+	for _, key := range keys {
+		if group == "options" &&
+			(key == "site_name" || key == "site_description" || key == "content_policy") {
+			values[key] = localizedOption(options, key, locale, "")
+		} else {
+			values[key] = options.Get(key)
+		}
+	}
+	if group == "options" && toString(values["update_source"]) == "" {
+		values["update_source"] = facades.Config().GetString("app.update_source")
+	}
+	if group == "score" {
+		parts := strings.Split(options.Get("sign_score"), ",")
+		if len(parts) == 2 {
+			values["sign_score_from"] = strings.TrimSpace(parts[0])
+			values["sign_score_to"] = strings.TrimSpace(parts[1])
+		}
+	}
+	return ctx.Response().Json(nethttp.StatusOK, values)
+}
+
 // Options 处理 GET|POST /admin/options。
 func (r *AdminOptionsController) Options(ctx goravelhttp.Context) goravelhttp.Response {
 	return r.handle(ctx, []string{
@@ -228,7 +314,7 @@ func (r *AdminOptionsController) handle(ctx goravelhttp.Context, keys []string) 
 	}
 	options := service.NewOption(conn, dialect)
 
-	if ctx.Request().Method() != nethttp.MethodPost {
+	if ctx.Request().Method() != nethttp.MethodPost && ctx.Request().Method() != nethttp.MethodPut {
 		values := make(goravelhttp.Json, len(keys))
 		for _, key := range keys {
 			values[key] = options.Get(key)
