@@ -226,6 +226,29 @@ func (r *AdminController) Index(ctx goravelhttp.Context) goravelhttp.Response {
 	})
 }
 
+// Dashboard 处理 GET /api/admin/dashboard（共享前端 P4）：统计数字。
+func (r *AdminController) Dashboard(ctx goravelhttp.Context) goravelhttp.Response {
+	_, conn, dialect, resp := requireAdmin(ctx)
+	if resp != nil {
+		return resp
+	}
+	users := repo.NewUserRepository(conn, dialect)
+	players := repo.NewPlayerRepository(conn, dialect)
+	textures := repo.NewTextureRepository(conn, dialect)
+	userCount, _ := users.CountAll()
+	playerCount, _ := players.CountAll()
+	textureCount, _ := textures.CountAll()
+	storage, _ := textures.SumSize()
+	display := fmt.Sprintf("%dKB", storage)
+	if storage > 1024 {
+		display = fmt.Sprintf("%.1fMB", float64(storage)/1024)
+	}
+	return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
+		"users": userCount, "players": playerCount, "textures": textureCount,
+		"storage": storage, "storageHuman": display,
+	})
+}
+
 // Chart 处理 GET /admin/chart：最近 31 天的注册/上传曲线。
 func (r *AdminController) Chart(ctx goravelhttp.Context) goravelhttp.Response {
 	_, conn, dialect, resp := requireAdmin(ctx)

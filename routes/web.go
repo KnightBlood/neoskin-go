@@ -217,6 +217,7 @@ func Web() {
 			return adminController.IndexPage(ctx)
 		})
 		router.Get("/admin/chart", adminController.Chart)
+		router.Get("/api/admin/dashboard", adminController.Dashboard)
 		router.Get("/admin/status", adminController.Status)
 		router.Get("/admin/plugins/data", pluginController.Data)
 		router.Get("/admin/plugins/manage", adminController.PluginsPage)

@@ -243,3 +243,10 @@ go test ./internal/db -run TestMatrix -v
   直接注册在 `routes/web.go`，复用 `currentUser` 会话与 `paginatorJSON`。
 - 返回结构与 `NeoSkinFrontend/docs/BACKEND-CONTRACT.md` §7.2 一致；
   匿名访问返回 `401 application/json`。
+
+### P4 增量端点（2026-11-07）
+
+- 新增 GET /api/admin/dashboard（管理端统计：用户/角色/材质/存储空间），
+  属于 NeoSkinFrontend 契约 v1 增量端点，不计入 PHP 174 条路由；`routes/web.go` 直接注册，复用 `requireAdmin`。
+- 匿名 401、非管理员 403；图表仍复用既有 GET /admin/chart。
+

@@ -321,3 +321,8 @@
   （`CountUnreadByUser`）、`routes/web.go`。
 - 验证：`go build` / `go test ./...` 全绿；本机 SQLite 浏览器联调站内信列表/详情（已读）与举报分页，
   前端 `contract-check.mjs` 匿名 401 断言通过。
+
+### 2026-11-07（P4 增量）
+- 新增 `GET /api/admin/dashboard`：用户/角色/材质数量与存储空间（KB + 人类可读）。
+- 实现：`app/http/controllers/admin_controller.go`（`Dashboard`）、`routes/web.go`。
+- 验证：`go build` / `go test ./...`；管理端仪表盘浏览器联调通过。
