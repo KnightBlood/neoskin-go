@@ -233,6 +233,7 @@ func Web() {
 		router.Get("/admin/plugins/market/list", marketController.List)
 		router.Post("/admin/plugins/market/download", marketController.Download)
 		router.Get("/admin/update", updateController.UpdatePage)
+		router.Get("/api/admin/update/info", updateController.Show)
 		router.Post("/admin/update/download", updateController.Download)
 		// Laravel 路由：throttle:6,1 / throttle:3,1。
 		router.Middleware(oauthmw.Throttle(6, 60)).Post("/admin/update/upload", updateController.Upload)
