@@ -20,7 +20,7 @@ Go / Goravel 实现的 **NeoSkin** 后端（Minecraft 皮肤托管平台），�
 - **数据库**：SQLite / MySQL / MariaDB / PostgreSQL / SQL Server（与 Laravel 一致；矩阵见 [DB-MATRIX.md](./DB-MATRIX.md)）
 - **认证**：Session + Cookie / OAuth2（Passport 兼容）
 - **模板**：Go `html/template`
-- **前端**：webpack + yarn 1.x（复用现有）
+- **前端**：legacy `public/app`（webpack + yarn 1.x）+ NeoSkin 共享前端 `public/app-next`（React 19 / Vite 8，`FRONTEND_MODE=legacy|next`）
 - **图像**：`image` + `golang.org/x/image` + WebP 编码（默认 WebP，`?png` 回退 PNG）
 
 ## 项目结构
