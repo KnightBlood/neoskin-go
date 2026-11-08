@@ -348,4 +348,4 @@
   返回 403；`/api/*` 保持不门禁（与 PHP `api` 中间件组一致）。
 - 验证：浏览器联调未验证用户 4 个写端点均 403、`/api/players` 200；
   恢复配置后页面正常；`go test ./...` 全绿。
-- 共享前端产物已同步到 `public/app-next`（site `index-97G5gvx2.js` / admin `index-DHuSRUon.js`）。
+- 共享前端产物已同步到 `public/app-next`（site `index-BNFSlUne.js` / admin `index-C75dBgWo.js`）。
