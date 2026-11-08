@@ -369,3 +369,7 @@
   `neoskin-go_<version>_<platform>.zip`，包含 二进制、`public/app`、`public/app-next`、`resources` 与部署文档。
 - 共享前端产物更新为 site `index-pnUYroLe.js` / admin `index-DOqbNUvq.js`。
 - 验证：`go build ./...` / `go test ./...` 全绿；本机 next 模式 setup 页已显示 NeoSkin。
+- 管理端写操作回归（Go 本机）：用户昵称/邮箱/积分/权限/验证状态/密码/删除，
+  角色改名/转移/材质/删除，举报审核，选项保存，通信草稿/发布/撤回，
+  翻译新增/更新/删除全部返回 `code:0`；修改自己的权限按 PHP 语义返回 403。
+- 插件列表为空、市场列表与更新检查正常；插件启停/更新下载安装因本地无插件/非落后版本未执行。
