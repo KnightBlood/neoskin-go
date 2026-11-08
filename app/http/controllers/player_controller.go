@@ -54,6 +54,9 @@ func (r *PlayerController) List(ctx goravelhttp.Context) goravelhttp.Response {
 			"message": "Unauthenticated.",
 		})
 	}
+	if denied := requireVerifiedOnUserRoutes(ctx, user, service.NewOption(conn, dialect)); denied != nil {
+		return denied
+	}
 
 	players, err := repo.NewPlayerRepository(conn, dialect).ListByUID(user.UID)
 	if err != nil {
@@ -81,6 +84,9 @@ func (r *PlayerController) Add(ctx goravelhttp.Context) goravelhttp.Response {
 	}
 
 	options := service.NewOption(conn, dialect)
+	if denied := requireVerifiedOnUserRoutes(ctx, user, options); denied != nil {
+		return denied
+	}
 	players := repo.NewPlayerRepository(conn, dialect)
 	users := repo.NewUserRepository(conn, dialect)
 
@@ -272,6 +278,9 @@ func (r *PlayerController) owned(ctx goravelhttp.Context) (*model.Player, *model
 	if user == nil {
 		return nil, nil, nil, nil, ctx.Response().Json(nethttp.StatusUnauthorized,
 			goravelhttp.Json{"message": "Unauthenticated."})
+	}
+	if denied := requireVerifiedOnUserRoutes(ctx, user, service.NewOption(conn, dialect)); denied != nil {
+		return nil, nil, nil, nil, denied
 	}
 
 	pid := ctx.Request().RouteInt("player")

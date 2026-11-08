@@ -336,3 +336,15 @@
 - 管理端 SPA 通过请求头 `X-Neoskin-Spa: 1` 标识；`POST|PUT /admin/communications*` 与撤回据此返回 JSON，其他请求保持 302（不改变 legacy 行为）。
 
 - 新增 `GET /api/admin/update/info`：返回 `latest/current/error/can_update/package/upload_limits`，管理端更新页直接展示最新版本与可更新状态。
+
+### 2026-11-08（bootstrap 开关 + 邮箱验证门禁）
+
+- `app/http/controllers/spa_controller.go` 的 bootstrap options 增加
+  `allow_downloading_texture`、`require_verification`、`player_name_length_min/max`、
+  `user_initial_score`、`return_score`、`sign_after_zero`、`sign_gap_time`、
+  `reporter_score_modification`、`reporter_reward_score`，供站点端按真实配置渲染。
+- 新增 `app/http/controllers/verification.go`，并在角色、材质、上传、举报处理器接入：
+  未验证用户访问 `/user/player*`、`/texture*`、`POST /skinlib`、`POST /skinlib/report`
+  返回 403；`/api/*` 保持不门禁（与 PHP `api` 中间件组一致）。
+- 验证：浏览器联调未验证用户 4 个写端点均 403、`/api/players` 200；
+  恢复配置后页面正常；`go test ./...` 全绿。

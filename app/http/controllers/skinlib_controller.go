@@ -434,6 +434,9 @@ func (r *SkinlibController) textureForManage(ctx goravelhttp.Context) (*model.Te
 		return nil, nil, nil, nil, ctx.Response().Json(nethttp.StatusUnauthorized,
 			goravelhttp.Json{"message": "Unauthenticated."})
 	}
+	if denied := requireVerified(ctx, user, service.NewOption(conn, dialect)); denied != nil {
+		return nil, nil, nil, nil, denied
+	}
 	if user.UID != texture.Uploader && !user.IsAdmin() {
 		return nil, nil, nil, nil, ctx.Response().Json(nethttp.StatusForbidden,
 			goravelhttp.Json{"code": 1, "message": t(ctx, "skinlib.no-permission")})
@@ -451,6 +454,9 @@ func (r *SkinlibController) Upload(ctx goravelhttp.Context) goravelhttp.Response
 		return ctx.Response().Json(nethttp.StatusUnauthorized, goravelhttp.Json{
 			"message": "Unauthenticated.",
 		})
+	}
+	if denied := requireVerified(ctx, user, service.NewOption(conn, dialect)); denied != nil {
+		return denied
 	}
 
 	name := strings.TrimSpace(ctx.Request().Input("name"))

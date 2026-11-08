@@ -49,6 +49,9 @@ func (r *ReportController) Submit(ctx goravelhttp.Context) goravelhttp.Response 
 			"message": "Unauthenticated.",
 		})
 	}
+	if denied := requireVerified(ctx, user, service.NewOption(conn, dialect)); denied != nil {
+		return denied
+	}
 
 	tid := ctx.Request().InputInt("tid")
 	reason := ctx.Request().Input("reason")

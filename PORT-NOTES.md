@@ -260,3 +260,16 @@ go test ./internal/db -run TestMatrix -v
 - 管理端 SPA 通过请求头 `X-Neoskin-Spa: 1` 标识；`POST|PUT /admin/communications*` 与撤回据此返回 JSON，其他请求保持 302（不改变 legacy 行为）。
 
 - 新增 `GET /api/admin/update/info`：返回 `latest/current/error/can_update/package/upload_limits`，管理端更新页直接展示最新版本与可更新状态。
+
+### 邮箱验证门禁与 bootstrap 开关（2026-11-08）
+
+- 新增 `app/http/controllers/verification.go`：`requireVerified` 对齐 PHP `CheckUserVerified`
+  （`require_verification = true` 且 `verified = false` → 403 JSON）；`requireVerifiedOnUserRoutes`
+  按路径把门禁限制在 `/user/*`，因为同一处理器也服务 `/api/*`，而 Laravel 的 API 路由不挂 `verified`。
+- 覆盖：`player_controller.go`（`GET /user/player/list`、`POST /user/player`、`DELETE|PUT /user/player/{player}*`）、
+  `skinlib_controller.go`（`textureForManage` → `/texture*`，`Upload` → `POST /skinlib`）、
+  `report_controller.go`（`POST /skinlib/report`）。
+- `GET /api/bootstrap` 的 options 补齐：`allow_downloading_texture`、`require_verification`、
+  `player_name_length_min/max`、`user_initial_score`、`return_score`、`sign_after_zero`、
+  `sign_gap_time`、`reporter_score_modification`、`reporter_reward_score`。
+- 验证：未验证用户请求上述 web 路由返回 403，`/api/players` 仍返回 200；`go test ./...` 全绿。
