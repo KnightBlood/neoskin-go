@@ -243,7 +243,23 @@ func (r *UpdateController) Install(ctx goravelhttp.Context) goravelhttp.Response
 	if _, _, _, resp := requireAdmin(ctx); resp != nil {
 		return resp
 	}
+	wantsJSON := strings.Contains(strings.ToLower(ctx.Request().Header("Accept")), "application/json") ||
+		ctx.Request().Header("X-Neoskin-Spa") != ""
+	session := ctx.Request().Session()
+	raw := ""
+	if session != nil {
+		if value := session.Get(sessionPackageKey); value != nil {
+			raw = fmt.Sprint(value)
+		}
+	}
+	var pending update.Info
+	hasPending := raw != "" && json.Unmarshal([]byte(raw), &pending) == nil
+
 	id := strings.ToLower(strings.TrimSpace(ctx.Request().Input("id")))
+	if id == "" && wantsJSON && hasPending {
+		// SPA 只拿到 /api/admin/update/info 里的 package.id；缺省时使用会话中的待安装包。
+		id = pending.ID
+	}
 	if id == "" {
 		return validationFailed(ctx, map[string][]string{
 			"id": {vRequired(ctx, "id")},
@@ -254,27 +270,28 @@ func (r *UpdateController) Install(ctx goravelhttp.Context) goravelhttp.Response
 			"id": {vSizeString(ctx, "id", "32")},
 		})
 	}
-	session := ctx.Request().Session()
-	raw := ""
-	if session != nil {
-		if value := session.Get(sessionPackageKey); value != nil {
-			raw = fmt.Sprint(value)
-		}
-	}
-	var pending update.Info
-	if raw == "" || json.Unmarshal([]byte(raw), &pending) != nil ||
-		subtle.ConstantTimeCompare([]byte(pending.ID), []byte(id)) != 1 {
+	if !hasPending || subtle.ConstantTimeCompare([]byte(pending.ID), []byte(id)) != 1 {
 		return ctx.Response().String(nethttp.StatusForbidden, "Forbidden")
 	}
 	if err := r.manager().Install(id); err != nil {
+		if wantsJSON {
+			return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
+				"code": 1, "message": err.Error(),
+			})
+		}
 		return r.redirectNotice(ctx, "update_error", err.Error())
 	}
 	removeCaches()
 	if session != nil {
 		session.Forget(sessionPackageKey)
 	}
-	return r.redirectNotice(ctx, "update_notice",
-		"系统程序已更新，版本检查与数据库升级将在后续请求中完成。")
+	message := "系统程序已更新，版本检查与数据库升级将在后续请求中完成。"
+	if wantsJSON {
+		return ctx.Response().Json(nethttp.StatusOK, goravelhttp.Json{
+			"code": 0, "message": message,
+		})
+	}
+	return r.redirectNotice(ctx, "update_notice", message)
 }
 
 func (r *UpdateController) redirectNotice(ctx goravelhttp.Context, key, message string) goravelhttp.Response {
