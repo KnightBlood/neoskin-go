@@ -376,3 +376,4 @@
 - GitHub Release `v6.0.11` 已发布：Linux/Windows/macOS × x64/arm64 共 6 个 `neoskin-go_6.0.11_*.zip`。
 - 专用环境验证插件启停与更新下载/安装；修复 SPA 更新安装：缺省 id 时使用会话待安装包，
   `Accept: application/json` / `X-Neoskin-Spa: 1` 返回 JSON 而非 302。
+- Patch Release `v6.0.11.1` 已发布：6 个平台资产，包含 SPA 更新安装 JSON/id 修复。
