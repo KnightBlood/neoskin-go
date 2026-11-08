@@ -349,3 +349,13 @@
 - 验证：浏览器联调未验证用户 4 个写端点均 403、`/api/players` 200；
   恢复配置后页面正常；`go test ./...` 全绿。
 - 共享前端产物已同步到 `public/app-next`（site `index-BNFSlUne.js` / admin `index-C75dBgWo.js`）。
+
+### 2026-11-08（P6 切换验收，Go 本机）
+
+- `FRONTEND_MODE=next`：`GET /` → 302 `/app-next/site/`，`GET /admin` → 302 `/app-next/admin/`，
+  两个 SPA 壳与 `/api/bootstrap` 均 200。
+- 174 路由回归冒烟：按 `conformance/data/routes.json` 请求 78 条 GET 路由，0 个 500
+  （其余 200/302/401/403/404 均为未登录、示例参数或权限语义）。
+- `FRONTEND_MODE=legacy` 回滚：`GET /` 返回 legacy 页面（含 `#blessing-extra`），
+  `/app-next/site/` 仍可访问，确认可一键回滚。
+- 浏览器逐页检查站点/管理端主要页面，0 console error；axe WCAG A/AA 关键页 0 violation。
