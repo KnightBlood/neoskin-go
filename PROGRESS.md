@@ -359,3 +359,4 @@
 - `FRONTEND_MODE=legacy` 回滚：`GET /` 返回 legacy 页面（含 `#blessing-extra`），
   `/app-next/site/` 仍可访问，确认可一键回滚。
 - 浏览器逐页检查站点/管理端主要页面，0 console error；axe WCAG A/AA 关键页 0 violation。
+- Playwright 浏览器 E2E（`NEOSKIN_BROWSER_E2E=1`）通过：home/login/skinlib/upload/user/admin。
