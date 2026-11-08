@@ -42,7 +42,7 @@ func TestHTTPEndToEnd(t *testing.T) {
 		{"/", 200, "window.blessing", "text/html"},
 		{"/auth/login", 200, "csrf-token", "text/html"},
 		{"/auth/register", 200, "csrf-token", "text/html"},
-		{"/setup", 200, "Blessing Skin", "text/html"},
+		{"/setup", 200, "NeoSkin", "text/html"},
 		{"/lang/zh_CN.js", 200, "blessing.i18n =", "application/javascript"},
 		{"/api", 200, "blessing_skin", "application/json"},
 		{"/skinlib/list", 200, "[", "application/json"},

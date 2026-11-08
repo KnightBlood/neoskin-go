@@ -348,7 +348,7 @@
   返回 403；`/api/*` 保持不门禁（与 PHP `api` 中间件组一致）。
 - 验证：浏览器联调未验证用户 4 个写端点均 403、`/api/players` 200；
   恢复配置后页面正常；`go test ./...` 全绿。
-- 共享前端产物已同步到 `public/app-next`（site `index-BNFSlUne.js` / admin `index-C75dBgWo.js`）。
+- 共享前端产物已同步到 `public/app-next`（site `index-pnUYroLe.js` / admin `index-DOqbNUvq.js`）。
 
 ### 2026-11-08（P6 切换验收，Go 本机）
 
@@ -360,3 +360,11 @@
   `/app-next/site/` 仍可访问，确认可一键回滚。
 - 浏览器逐页检查站点/管理端主要页面，0 console error；axe WCAG A/AA 关键页 0 violation。
 - Playwright 浏览器 E2E（`NEOSKIN_BROWSER_E2E=1`）通过：home/login/skinlib/upload/user/admin。
+
+### 2026-11-08（NeoSkin 品牌与发布）
+
+- 默认站点名/描述/公告、安装向导与更新包提示改为 NeoSkin；版权选项与页脚署名保留
+  Blessing Skin Server 上游归属（见 `PORT-NOTES.md`）。
+- 新增 `.github/workflows/release.yml`：推送 `v*` tag 后在 GitHub runner 构建并发布
+  `neoskin-go_<version>_<platform>.zip`，包含 二进制、`public/app`、`public/app-next`、`resources` 与部署文档。
+- 共享前端产物更新为 site `index-pnUYroLe.js` / admin `index-DOqbNUvq.js`。

@@ -26,7 +26,7 @@ func renderAuthPage(ctx goravelhttp.Context, page, titleKey string,
 	options := service.NewOption(conn, dialect)
 	locale := localeMiddleware.LocaleOf(ctx)
 	translator := i18n.New(locale, repo.NewLanguageLineRepository(conn, dialect).Overrides(locale))
-	siteName := localizedOption(options, "site_name", locale, "Blessing Skin")
+	siteName := localizedOption(options, "site_name", locale, "NeoSkin")
 
 	extraJSON, _ := json.Marshal(extra)
 	data := view.AuthData{

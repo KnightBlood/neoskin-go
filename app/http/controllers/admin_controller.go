@@ -62,7 +62,7 @@ func adminPageData(ctx goravelhttp.Context, titleKey string,
 	options := service.NewOption(conn, dialect)
 	locale := localeMiddleware.LocaleOf(ctx)
 	translator := i18n.New(locale, repo.NewLanguageLineRepository(conn, dialect).Overrides(locale))
-	siteName := localizedOption(options, "site_name", locale, "Blessing Skin")
+	siteName := localizedOption(options, "site_name", locale, "NeoSkin")
 	navbarColor := options.Get("navbar_color")
 	if navbarColor == "" {
 		navbarColor = "cyan"

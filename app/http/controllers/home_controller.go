@@ -41,7 +41,7 @@ func (r *HomeController) Index(ctx goravelhttp.Context) goravelhttp.Response {
 	users := repo.NewUserRepository(conn, dialect)
 	user, _ := auth.CurrentUser(ctx, users)
 
-	siteName := localizedOption(options, "site_name", locale, "Blessing Skin")
+	siteName := localizedOption(options, "site_name", locale, "NeoSkin")
 	navbarColor := options.Get("navbar_color")
 	if navbarColor == "" {
 		navbarColor = "cyan"

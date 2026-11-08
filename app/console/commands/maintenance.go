@@ -67,7 +67,7 @@ func (r *BsInstall) Extend() command.Extend {
 func (r *BsInstall) Handle(ctx console.Context) error {
 	lockPath := filepath.Join(runtime.StorageRoot(), "install.lock")
 	if _, err := os.Stat(lockPath); err == nil {
-		ctx.Info("You have installed Blessing Skin Server. Nothing to do.")
+		ctx.Info("You have installed NeoSkin. Nothing to do.")
 		return nil
 	}
 
@@ -125,7 +125,7 @@ type OptionsCache struct{}
 
 func (r *OptionsCache) Signature() string { return "options:cache" }
 
-func (r *OptionsCache) Description() string { return "Cache Blessing Skin options" }
+func (r *OptionsCache) Description() string { return "Cache NeoSkin options" }
 
 func (r *OptionsCache) Extend() command.Extend { return command.Extend{} }
 

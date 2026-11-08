@@ -4,7 +4,7 @@
 
 > 仓库：<https://github.com/KnightBlood/neoskin-go>
 
-Go / Goravel 实现的 Minecraft 皮肤托管平台后端，迁移自 `blessing-skin-server-Laravel13`（6.0.11_patch）。
+Go / Goravel 实现的 **NeoSkin** 后端（Minecraft 皮肤托管平台），迁移自 `blessing-skin-server-Laravel13`（6.0.11_patch）。
 
 > **当前状态：迁移主体完成（2026-11-04 校准）。**
 > Phase 0–6 完成；Phase 7 插件系统 80%（Go 原生 Hook/Filter/Event，PHP 插件代码不可执行）；
@@ -182,3 +182,16 @@ GOOS=darwin  GOARCH=arm64 go build ./...
 ## 许可证
 
 与源项目一致。
+
+## 发布
+
+推送 `v*` tag 后，`.github/workflows/release.yml` 在
+Linux / Windows / macOS 的 x64 与 arm64 runner 上构建并发布：
+
+```bash
+git tag v6.0.11
+git push origin v6.0.11
+```
+
+Release 产物：`neoskin-go_<version>_<platform>.zip`，包含二进制、
+`public/{app,app-next}`、`resources`、`.env.example` 与部署文档。

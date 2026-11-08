@@ -424,7 +424,7 @@ func detectPrefix(names map[string]*zip.File) (string, error) {
 		prefix = strings.TrimSuffix(name, "composer.json")
 	}
 	if prefix == "" {
-		return "", errors.New("未识别到 Blessing Skin 系统运行包。")
+		return "", errors.New("未识别到 NeoSkin 系统运行包。")
 	}
 	return prefix, nil
 }

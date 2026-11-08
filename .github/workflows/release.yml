@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  GO_VERSION: "1.27.x"
+
+jobs:
+  build:
+    name: Build (${{ matrix.asset }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,    asset: linux-x64,    binary: neoskin }
+          - { os: ubuntu-24.04-arm, asset: linux-arm64,  binary: neoskin }
+          - { os: windows-latest,   asset: windows-x64,  binary: neoskin.exe }
+          - { os: windows-11-arm,   asset: windows-arm64,binary: neoskin.exe }
+          - { os: macos-15-intel,   asset: macos-x64,    binary: neoskin }
+          - { os: macos-latest,     asset: macos-arm64,  binary: neoskin }
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Resolve version
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [ -z "$VERSION" ] || [ "$VERSION" = "$GITHUB_REF_NAME" ]; then
+            VERSION="dev-${GITHUB_SHA::7}"
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Build binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p stage dist
+          go build -trimpath -ldflags "-s -w" -o "stage/${{ matrix.binary }}" .
+          cp -r public resources stage/
+          cp .env.example README.md DEPLOYMENT.md stage/
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Compress-Archive -Path 'stage/*' `
+            -DestinationPath "dist/neoskin-go_${env:VERSION}_${{ matrix.asset }}.zip" -Force
+
+      - name: Package (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd stage && zip -r "../dist/neoskin-go_${VERSION}_${{ matrix.asset }}.zip" .)
+          ls -lh dist/*.zip
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: go-${{ matrix.asset }}
+          path: dist/*.zip
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: go-*
+          path: dist
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: dist/*.zip
+          generate_release_notes: true

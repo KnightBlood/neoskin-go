@@ -48,7 +48,7 @@ func bootstrapPayload(ctx goravelhttp.Context, mode string) map[string]any {
 		options = service.NewOption(nil, nil)
 	}
 
-	siteName := localizedOption(options, "site_name", locale, "Blessing Skin")
+	siteName := localizedOption(options, "site_name", locale, "NeoSkin")
 	var user any
 	if conn != nil {
 		if current, err := auth.CurrentUser(ctx, repo.NewUserRepository(conn, dialect)); err == nil && current != nil {
@@ -110,7 +110,7 @@ func bootstrapInt(options *service.Option, key string, fallback int) int {
 
 func bootstrapOptions(options *service.Option, locale string) map[string]any {
 	return map[string]any{
-		"site_name":                       localizedOption(options, "site_name", locale, "Blessing Skin"),
+		"site_name":                       localizedOption(options, "site_name", locale, "NeoSkin"),
 		"site_description":                localizedOption(options, "site_description", locale, ""),
 		"user_can_register":               true,
 		"register_with_player_name":       bootstrapBool(options, "register_with_player_name", true),
