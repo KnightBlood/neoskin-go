@@ -377,3 +377,11 @@
 - 专用环境验证插件启停与更新下载/安装；修复 SPA 更新安装：缺省 id 时使用会话待安装包，
   `Accept: application/json` / `X-Neoskin-Spa: 1` 返回 JSON 而非 302。
 - Patch Release `v6.0.11.1` 已发布：6 个平台资产，包含 SPA 更新安装 JSON/id 修复。
+
+### 2026-11-08（管理端运行状态四端联调）
+
+- `GET /admin/status` 保持 JSON 输出；与 .NET / Spring / Rust 新增的
+  `Accept: application/json` / `X-Neoskin-Spa: 1` 内容协商对齐。
+- 四端共享 `spa.sqlite` 联调：`/app-next/admin/status` 分别展示 Goravel、.NET、Java、Rust
+  的版本、运行时、数据库与插件信息，不再只显示 Go 端数据。
+- 普通 HTML 请求仍返回 legacy 状态页（Go 端原本即输出 JSON，保持不变）。

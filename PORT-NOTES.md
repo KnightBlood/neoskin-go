@@ -285,3 +285,10 @@ go test ./internal/db -run TestMatrix -v
 - SPA 更新安装：`POST /admin/update/install` 在 `Accept: application/json` 或
   `X-Neoskin-Spa: 1` 时返回 `{code,message}`；未传 `id` 时使用会话中的待安装包 id。
   legacy 表单仍要求 32 位 id 并保持 302。
+
+### 管理端运行状态（2026-11-08）
+
+- `GET /admin/status` 输出 `bs` / `server` / `db` / `plugins` JSON，供管理端 SPA
+  直接展示；四端共享 `spa.sqlite` 联调时各自返回本实现信息。
+- Go 端没有 legacy 状态页，普通 HTML 请求同样返回 JSON；.NET / Spring / Rust
+  仅在 SPA 内容协商时返回 JSON，其余请求保持 legacy 页面。
