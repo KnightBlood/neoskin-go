@@ -368,3 +368,4 @@
 - 新增 `.github/workflows/release.yml`：推送 `v*` tag 后在 GitHub runner 构建并发布
   `neoskin-go_<version>_<platform>.zip`，包含 二进制、`public/app`、`public/app-next`、`resources` 与部署文档。
 - 共享前端产物更新为 site `index-pnUYroLe.js` / admin `index-DOqbNUvq.js`。
+- 验证：`go build ./...` / `go test ./...` 全绿；本机 next 模式 setup 页已显示 NeoSkin。
